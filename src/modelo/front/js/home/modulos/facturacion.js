@@ -188,9 +188,8 @@ function calculaImpuestos(objeto, numeroForm, atributo, datos) {
 
                     if (dataImpuestos != undefined) {
 
-                        $.extend(true, impuestos, { [dataImpuestos.name]: { tasa: dataImpuestos.tasa } });
+                        impuestos[dataImpuestos.name] = { tasa: dataImpuestos.tasa };
                         impuestos[dataImpuestos.name].base = Number(impuestos[dataImpuestos.name].base || 0) + Number(baseImporte)
-
 
                     }
 

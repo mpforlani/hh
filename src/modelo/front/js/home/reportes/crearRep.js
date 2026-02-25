@@ -2,7 +2,8 @@ const tipoDeTabla = {
     agrupSubgrupMesAno: agrupadorSubAgrupadorMeses,
     infoEntidadMasEditTable,
     agrupadoMes,
-    tipoExtracto
+    tipoExtracto,
+    cotizacionMonedaExtranjera
 }
 /*const tablaDetalle = {
     getGroup: "get",
@@ -172,7 +173,7 @@ async function crearCuerpoReporte(objeto, numeroForm) {
 
             try {
                 const res = await fetch(
-                    `/${get}?base=${entidadOrigen.accion}${filtros}${objetoBusqueda}${totales}${sort}${plancha}${addField}`,
+                    `/${get}?base=${entidadOrigen?.accion}${filtros}${objetoBusqueda}${totales}${sort}${plancha}${addField}`,
                     { method: "GET" });
 
                 if (!res.ok) throw new Error(`Error HTTP ${res.status}`);

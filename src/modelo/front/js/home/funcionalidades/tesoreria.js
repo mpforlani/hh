@@ -302,11 +302,8 @@ let variablesModeloTesoreria = {
                     N("compra"),
                     N("venta")
                 ],
-                filtros: {
-
-                },
                 titulos: ["Moneda", "Fecha", "Compra", "Venta"],
-                type: "tipoExtracto",
+                type: "cotizacionMonedaExtranjera",
                 datos: "cotizaciones",
                 entidad: "cotizacionMonedaExtranjera",
             },
@@ -344,7 +341,6 @@ let variablesModeloTesoreria = {
         },
         pest: `Cotizacion Moneda Extranjera`,
         accion: `cotizacionMonedaExtranjera`,
-        //fechas: ["fecha"],
 
     },
     transferencia: {

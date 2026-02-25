@@ -296,7 +296,6 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
     let anteriores = []
     let complemento = ""
     let colum = 0
-    let filtro = [];
 
     if (objeto?.totalHorizontal) {
 
@@ -747,6 +746,37 @@ async function tableDetalleEnumeracion(objeto, numeroForm, data) {
     return table
 
 }
+function cotizacionMonedaExtranjera(objeto, numeroForm, nombreTab) {
+
+    let tabla = ""
+
+    console.log(consultaGet[numeroForm][nombreTab])
+    $.each(consultaGet[numeroForm][nombreTab], (indice, value) => {
+
+        console.log(indice)
+        console.log(value)
+
+        tabla += `<div class="tituloTabla"><p>${indice || ""}</p></div>`
+        tabla += `<table tablaRef="${indice}">`
+        tabla += `<tr class="titulosFila">`
+
+        $.each()
+
+
+
+        tabla += `</tr>`
+        tabla += `</table>`
+
+
+
+
+    })
+
+    $(tabla).appendTo(`#t${numeroForm}`);
+
+
+
+}
 ////Tablas Calculadsas
 function tableCalculada(objetoCalc, numeroForm, objeto, tablaName) {
 
@@ -866,4 +896,3 @@ function tablaPromedio(objetoCalc, numeroForm, objeto, tablaName) {
     $(tabla).appendTo(`#t${numeroForm}`);
 
 }
-

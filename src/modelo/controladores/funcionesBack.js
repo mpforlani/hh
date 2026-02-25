@@ -343,9 +343,16 @@ function monedasCotis(monedas) {
 
     let monedasReturn = ""
 
-    for (const moneda of monedas) {
+    if (monedas) {
 
-        monedasReturn += `&filtro${moneda}=1`
+        for (const moneda of monedas) {
+
+            monedasReturn += `&filtro${moneda}=1`
+        }
+    } else {
+
+        monedasReturn += `&filtroDolar=1&filtroEuro=1`
+
     }
 
     return monedasReturn;

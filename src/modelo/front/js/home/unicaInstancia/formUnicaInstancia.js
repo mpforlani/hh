@@ -587,7 +587,10 @@ async function crearFormulario(objeto, numeroForm, consult) {//doc
 
                 $.each(Object.keys(objeto.atributos.compuesto[table].componentes), (indice, value) => {
 
-                    $.extend(true, valoresModificados.coleccion, { [value]: { [fila]: consulta?.[value]?.[indiceDelObjeto] } });
+                    valoresModificados.coleccion[value] = valoresModificados.coleccion[value] || {};
+                    const dato = consulta?.[value]?.[indiceDelObjeto];
+                    valoresModificados.coleccion[value][fila] = dato ?? "";
+
                 })
                 $(e.target).addClass("modificado")
             }
@@ -648,9 +651,15 @@ async function crearFormulario(objeto, numeroForm, consult) {//doc
                     $(botonAgregado).appendTo($(`#t${numeroForm} div.listadoAdjunto div.tr[fila=${ultimaFila}]`).prev())
                 }
 
-                $.extend(true, valoresModificados.adjunto, { nameUsu: { [fila]: consulta?.nameUsu?.[fila] } });
-                $.extend(true, valoresModificados.adjunto, { path: { [fila]: consulta?.path?.[fila] } });
-                $.extend(true, valoresModificados.adjunto, { originalname: { [fila]: consulta?.originalname?.[fila] } });
+
+                valoresModificados.adjunto.nameUsu = valoresModificados.adjunto.nameUsu || {};
+                valoresModificados.adjunto.nameUsu[fila] = consulta?.nameUsu?.[fila] ?? {};
+
+                valoresModificados.adjunto.path = valoresModificados.adjunto.path || {};
+                valoresModificados.adjunto.path[fila] = consulta?.path?.[fila] ?? {};
+
+                valoresModificados.adjunto.originalname = valoresModificados.adjunto.originalname || {};
+                valoresModificados.adjunto.originalname[fila] = consulta?.originalname?.[fila] ?? {};
 
                 $(`#t${numeroForm} div.tr[fila=${fila}]`).remove()
 
@@ -923,8 +932,15 @@ async function crearFormulario(objeto, numeroForm, consult) {//doc
 
             let indiceDelObjeto = (consulta?.[`position${table}`] || []).indexOf(fila) || fila
 
-            $.extend(true, valoresModificados.coleccion, { [e.target.name]: { [fila]: consulta?.[e.target.name]?.[indiceDelObjeto] || "Nuevo" } });
-            $.extend(true, tableModificadas, { [table]: { [fila]: true } });  //Este lo agrego para saber si fue modificada a la hora de actualizar el desencadenante ver condicion de ejecucion desecadenate colección despues que abre por linea 
+            valoresModificados.coleccion = valoresModificados.coleccion || {};
+            valoresModificados.coleccion[e.target.name] = valoresModificados.coleccion[e.target.name] || {};
+
+            const dato = consulta?.[e.target.name]?.[indiceDelObjeto];
+            valoresModificados.coleccion[e.target.name][fila] = dato ?? "Nuevo";
+
+            tableModificadas = tableModificadas || {};
+            tableModificadas[table] = tableModificadas[table] || {};
+            tableModificadas[table][fila] = true;
 
             $(e.target).addClass("modificado")
 
@@ -934,12 +950,20 @@ async function crearFormulario(objeto, numeroForm, consult) {//doc
             let fila = $(e.target).parents(".tr").attr("fila")
             if (e.target.name == "adjunto") {
 
-                $.extend(true, valoresModificados.adjunto, { nameUsu: { [fila]: consulta?.nameUsu?.[fila] || "Nuevo" } });
-                $.extend(true, valoresModificados.adjunto, { path: { [fila]: consulta?.path?.[fila] || "Nuevo" } });
-                $.extend(true, valoresModificados.adjunto, { originalname: { [fila]: consulta?.originalname?.[fila] || "Nuevo" } });
+                valoresModificados.adjunto.nameUsu = valoresModificados.adjunto.nameUsu || {};
+                valoresModificados.adjunto.nameUsu[fila] = consulta?.nameUsu?.[fila] ?? "Nuevo";
+
+                valoresModificados.adjunto.path = valoresModificados.adjunto.path || {};
+                valoresModificados.adjunto.path[fila] = consulta?.path?.[fila] ?? "Nuevo";
+
+                valoresModificados.adjunto.originalname = valoresModificados.adjunto.originalname || {};
+                valoresModificados.adjunto.originalname[fila] = consulta?.originalname?.[fila] ?? "Nuevo";
             } else {
 
-                $.extend(true, valoresModificados.adjunto, { [e.target.name]: { [fila]: consulta?.[e.target.name]?.[fila] || "Nuevo" } });
+                valoresModificados.adjunto[e.target.name] = valoresModificados.adjunto[e.target.name] || {};
+
+                const dato = consulta?.[e.target.name]?.[fila];
+                valoresModificados.adjunto[e.target.name][fila] = dato ?? "Nuevo";
             }
         })
         valoresModificados.tipoDeModif = $(`#t${numeroForm}`).attr("recons") || "Modificación de registro"
@@ -1052,7 +1076,12 @@ async function enviarRegistroNuevoForm(numeroForm, objeto, electronica) {//doc
                 }
                 valorEnviar.arrays.push(objetArray)
 
-                $.extend(true, valorEnviar, { referencias: { desencadenantesColec: Object.assign(valorEnviar?.referencias?.["referencias.desencadenantesColec"] || {}, resultado?.referencias?.["referencias.desencadenantesColec"] || {}) } });
+                valorEnviar.referencias = valorEnviar.referencias || {};
+
+                const actual = valorEnviar.referencias["referencias.desencadenantesColec"] || {};
+                const nuevo = resultado?.referencias?.["referencias.desencadenantesColec"] || {};
+
+                valorEnviar.referencias.desencadenantesColec = { ...actual, ...nuevo };
 
             });
 
@@ -1073,14 +1102,12 @@ async function enviarRegistroNuevoForm(numeroForm, objeto, electronica) {//doc
                 atributosArrayCompuesto: resultado.atributosArray
             });
 
-            $.extend(true, valorEnviar, {
-                referencias: {
-                    desenColecAgrup: Object.assign(
-                        valorEnviar?.referencias?.["referencias.desenColecAgrup"] || {},
-                        resultado?.referencias?.["referencias.desenColecAgrup"] || {}
-                    )
-                }
-            });
+            valorEnviar.referencias = valorEnviar.referencias || {};
+
+            const actual = valorEnviar.referencias["referencias.desenColecAgrup"] || {};
+            const nuevo = resultado?.referencias?.["referencias.desenColecAgrup"] || {};
+
+            valorEnviar.referencias.desenColecAgrup = { ...actual, ...nuevo };
 
             promises.push(resultado)
         }
@@ -1100,7 +1127,12 @@ async function enviarRegistroNuevoForm(numeroForm, objeto, electronica) {//doc
                 }
                 valorEnviar.arrays.push(objetArray)
 
-                $.extend(true, valorEnviar, { referencias: { childColec: Object.assign(valorEnviar?.referencias?.["referencias.desencadenantesColec"] || {}, resultado?.referencias?.["referencias.desencadenantesColec"] || {}) } });
+                valorEnviar.referencias = valorEnviar.referencias || {};
+
+                const actual = valorEnviar.referencias["referencias.desencadenantesColec"] || {};
+                const nuevo = resultado?.referencias?.["referencias.desencadenantesColec"] || {};
+
+                valorEnviar.referencias.childColec = { ...actual, ...nuevo };
 
             });
             promises.push(promise);
