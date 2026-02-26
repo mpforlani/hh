@@ -134,13 +134,16 @@ async function crearCuerpoReporte(objeto, numeroForm) {
                     detalleFiltroAtributos[type || "cabecera"][nombre] = valor
                 }
             })
+            let detalleFiltroAtributosFuncion = { cabecera: {}, coleccion: {} }
             $.each($(`#bf${numeroForm} .selecAtributo.function:not(.todos)`), (indice, value) => {
 
                 let name = $(`.selectCont`, value).attr("name")
                 let type = $(value).parents(".selecAtributo").attr("type") || "cabecera"
 
-                detalleFiltroAtributos[type || "cabecera"] = detalleFiltroAtributos[type || "cabecera"] || {}
-                detalleFiltroAtributos[type || "cabecera"] = objeto.cabeceraCont?.parametricaDef?.[name]?.function[0](objeto, numeroForm, ...objeto.cabeceraCont?.parametricaDef?.[name]?.function[1])
+                detalleFiltroAtributosFuncion[type || "cabecera"] = detalleFiltroAtributosFuncion[type || "cabecera"] || {}
+                detalleFiltroAtributosFuncion[type || "cabecera"] = objeto.cabeceraCont?.parametricaDef?.[name]?.function[0](objeto, numeroForm, ...objeto.cabeceraCont?.parametricaDef?.[name]?.function[1])
+
+
             })
 
             if (get == "get") {
@@ -165,7 +168,9 @@ async function crearCuerpoReporte(objeto, numeroForm) {
             }
 
             let objetoGr = objetoTab.group
-
+            Object.assign(detalleFiltroAtributos.cabecera, detalleFiltroAtributosFuncion.cabecera)
+            Object.assign(detalleFiltroAtributos.coleccion, detalleFiltroAtributosFuncion.coleccion)
+            //ESto lo hago para dalr atributo libre y poder usar funciones en funcion
             const filtros = `&filtros=${JSON.stringify(detalleFiltroAtributos)}`
             const objetoBusqueda = `&objetoGroup=${JSON.stringify(objetoGr || {})}`
             const totales = `&totales=${JSON.stringify(objetoTab.totales || {})}`

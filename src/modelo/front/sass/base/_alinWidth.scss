@@ -35,6 +35,10 @@
     display: flex !important;
 }
 
+.row {
+    flex-direction: row !important;
+}
+
 .column {
     flex-direction: column;
 }
@@ -198,6 +202,14 @@
     padding-left: 1rem;
 }
 
+.bordCinco {
+
+    border-radius: 5px;
+}
+
+.noWrap {
+    white-space: nowrap;
+}
 
 .space-between {
     justify-content: space-between !important;

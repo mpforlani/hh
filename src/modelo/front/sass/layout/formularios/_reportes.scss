@@ -6,8 +6,10 @@
 
     .comand.tabla {
 
-        flex-direction: row;
         display: none;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
         padding: 0;
 
         &.active {
@@ -27,7 +29,6 @@
 
                 p {
                     font-size: 1rem;
-                    // font-weight: bold;
                 }
 
                 input[type="date"] {
@@ -90,6 +91,12 @@
                         background-color: rgb(132, 145, 221) !important;
                     }
                 }
+            }
+
+            &.botones {
+                position: absolute;
+                bottom: 20%;
+                right: 20px;
             }
 
             .selecAtributo {
@@ -158,6 +165,7 @@
 
         .barraForm {
             margin: 0.5rem 0 0 0.5rem;
+
         }
     }
 }
@@ -206,10 +214,8 @@
     }
 
     table {
-        margin-right: 2rem;
+        margin: 0.7rem 2rem 0.7rem 2rem;
         min-height: max-content;
-        margin-left: 2rem;
-
 
         &.trBordes {
             tr:not(:last-child) {
@@ -366,15 +372,12 @@
 
             td,
             th {
-
-                font-family: $letra-pestana;
                 min-width: 7rem;
 
             }
 
             th {
                 font-size: 1rem;
-                background-color: #ffffffd3;
                 display: flex;
                 justify-content: center;
                 align-items: center;

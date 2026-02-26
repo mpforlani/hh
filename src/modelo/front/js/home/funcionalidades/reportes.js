@@ -418,7 +418,7 @@ let variablesModeloReportes = {
         },
         entidad: "stock",
         cabeceraCont: {
-            parametrica: [{ atributo: P("producto"), type: "coleccion" }],
+            parametrica: [{ atributo: P("producto"), type: "coleccion", titulo: "Producto" }],
             fecha: [Date.now(), -30],
             botones: [{ boton: iLupaRep }],
         },
@@ -501,6 +501,7 @@ let variablesModeloReportes = {
                 atributosEnMeses: [I("totalConPrecio")],
                 entidad: "acumulador",
                 totalVertical: true,
+                totalTitulos: ["Total"],
                 acumulador: {
                     coleccion: {
                         entidad: [filtroValorIgual, `stock`],
@@ -596,7 +597,7 @@ let variablesModeloReportes = {
 
         },
         cabeceraCont: {
-            parametrica: [{ atributo: P("proveedor"), type: "cabecera" }],
+            parametrica: [{ atributo: P("proveedor"), type: "cabecera", titulo: "Proveedor" }],
             botones: [{ boton: iLupaRep }],
 
         },
@@ -631,7 +632,7 @@ let variablesModeloReportes = {
 
         },
         cabeceraCont: {
-            parametrica: [{ atributo: P("cliente"), type: "coleccion" }],
+            parametrica: [{ atributo: P("cliente"), type: "coleccion", titulo: "Cliente" }],
             botones: [{ boton: iLupaRep }],
 
         },
@@ -774,7 +775,7 @@ let variablesModeloReportes = {
 
         },
         cabeceraCont: {
-            parametrica: [{ atributo: P("moneda"), type: "cabecera" }],
+            parametrica: [{ atributo: P("moneda"), type: "cabecera", titulo: "Moneda" }],
             rango: [],
             botones: [{ boton: iLupaRep }],
 
@@ -899,7 +900,7 @@ let variablesModeloReportes = {
 
         },
         cabeceraCont: {
-            parametrica: [{ atributo: P("moneda"), type: "cabecera" }],
+            parametrica: [{ atributo: P("moneda"), type: "cabecera", titulo: "Moneda" }],
             rango: [],
             botones: [{ boton: iLupaRep }],
 
@@ -930,7 +931,7 @@ let variablesModeloReportes = {
             },
         },
         cabeceraCont: {
-            parametrica: [{ atributo: P("bancos"), type: "cabecera" }, { atributo: P("moneda"), type: "cabecera" }],
+            parametrica: [{ atributo: P("bancos"), type: "cabecera", titulo: "Bancos" }, { atributo: P("moneda"), type: "cabecera", titulo: "Moneda", clases: "margin-left-dos" }],
             fecha: [Date.now(), -30],
             botones: [{ boton: iLupaRep }],
 
@@ -960,7 +961,7 @@ let variablesModeloReportes = {
 
         },
         cabeceraCont: {
-            parametrica: [{ atributo: P("cajas"), type: "cabecera" }, { atributo: P("moneda"), type: "cabecera" }],
+            parametrica: [{ atributo: P("cajas"), type: "cabecera", titulo: "Cajas" }, { atributo: P("moneda"), type: "cabecera", titulo: "Moneda", clases: "margin-left-dos" }],
             fecha: [Date.now(), -30],
             botones: [{ boton: iLupaRep }],
 
@@ -1071,7 +1072,7 @@ let variablesModeloReportes = {
         acumulador: variablesModeloPagosCobros.cuentaCorrienteClientes.acumulador,
         entidad: "cuentaCorrienteClientes",
         cabeceraCont: {
-            parametrica: [{ atributo: P("cliente"), type: "cabecera" }, { atributo: P("moneda"), type: "cabecera" }],
+            parametrica: [{ atributo: P("cliente"), type: "cabecera", titulo: "Cliente" }, { atributo: P("moneda"), type: "cabecera", titulo: "Moneda", clases: "margin-left-dos" }],
             fecha: [Date.now(), -30],
             saldo: [],
             botones: [{ boton: iLupaRep }],
@@ -1153,7 +1154,7 @@ let variablesModeloReportes = {
         acumulador: variablesModeloPagosCobros.cuentaCorrienteProveedores.acumulador,
         entidad: "cuentaCorrienteProveedores",
         cabeceraCont: {
-            parametrica: [{ atributo: P("proveedor"), type: "cabecera" }, { atributo: P("moneda"), type: "cabecera" }],
+            parametrica: [{ atributo: P("proveedor"), type: "cabecera", titulo: "Proveedor" }, { atributo: P("moneda"), type: "cabecera", titulo: "Moneda", clases: "margin-left-dos" }],
             fecha: [Date.now(), -30],
             saldo: [],
             botones: [{ boton: iLupaRep }],

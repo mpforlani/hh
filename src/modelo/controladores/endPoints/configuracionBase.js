@@ -358,8 +358,9 @@ router.post('/log-frontend-error', (req, res) => {
 router.get('/cotizaciones', async (req, res) => {
     try {
 
-        const fechas = generarFechasCotis(req.query.desde, req.query.hasta);
-        const monedas = monedasCotis(req.query.moneda);
+        let filtros = JSON.parse(req.query?.filtros)
+        const fechas = generarFechasCotis(req.query.desde || filtros?.cabecera?.fecha?.desde, req.query.hasta || filtros?.cabecera?.fecha?.hasta);
+        const monedas = monedasCotis(req.query.moneda || filtros?.cabecera?.moneda);
         const historico = await obtenerBNAporFecha(fechas, monedas);
 
         let objetoHisto = historico.reduce((acc, item) => {

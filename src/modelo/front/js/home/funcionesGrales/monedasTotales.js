@@ -909,3 +909,18 @@ function atributoSaldoAbm(objeto, numeroForm, atributo, atributoSaldo) {
     $(`#t${numeroForm} .inputTd.${atributo} input`).addClass("ocultoSiempre").removeClass("monedaBase")
     $(`#t${numeroForm} .inputTd.${atributo}`).removeAttr("moneda")
 }
+//Cotización Reporte
+function monedaCotis(objeto, numeroForm) {
+
+    let valor = $(`#bf${numeroForm} .inputSelect.moneda`).val()
+
+    if (valor == "Todas") {
+
+        return { moneda: "" }
+    } else {
+
+        return {
+            moneda: [valor]
+        }
+    }
+}

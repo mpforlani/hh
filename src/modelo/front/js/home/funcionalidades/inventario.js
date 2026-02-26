@@ -413,29 +413,73 @@ let variablesModeloInventarios = {
                 consultaStock: [consultaStock],
                 salidaStock: [salidaStock],
                 completaConCodigo: [completaConCodigo],
+                ajustesSalida: [ajustesSalida],
             },
+        },
+        desencadenaColeccion: {
+            ajusteInventario: {
+                type: "condicionSegunFuncion",
+                coleccionOrigen: movimientoStock,
+                identificador: "ajusteInventario",
+                destino: "stock",
+                nombre: "Ajustes",
+                funcionCondicion: [tipoOperacion],
+                opciones: {
+                    ajuste: {
+                        destino: "stock",
+                        identificador: "ajuste",
+                        nombre: "Ajustes",
+                        atributosColeccion: {
+                            funcion: {
+                                marca: [buscarAtributosParamentricos, "marca", "producto"]
+                            },
+                            valorFijo: {
+                                estado: "Ajuste",
+                                estadoFacturacion: "Ajuste",
+                            },
+                            cambiarAtributos: {
+                                disponibles: "cantidad"
+                            },
+                            grabarEnOrigen: { Número: "numerador" },
+                            grabarEnOrigenColeccion: { Número: "numerador" },
+                            grabarEnDestino: { Número: "numerador" },
+                        },
+                        grabarEnDestino: { Número: "numerador" },
+                        grabarEnOrigenColeccion: { Número: "numerador" }, //se pone primer el atributo en el origen segundo en el destino
+                    }
+                },
+            }
         },
         imputarcoleccion: {
             salidaInventario: {
-                type: "directo",
+                type: "condicionSegunFuncion",
                 coleccionOrigen: movimientoStock,
                 identificador: "salidaInventario",
                 eliminarDesencadenate: ["producto"],//Si cambia este atributo se elimina el desencadenate
                 destino: "stock",
                 nombre: "Salidas stock",
-                atributoImputables: {
-                    funcion: {
-                        disponibles: [pagoParcialImporte, "cantidadSalidas", "disponibles"],
-                        estado: [pagoParcialString, "cantidadSalidas", { parcial: "Salida parcial", cerrado: "Salida total" }],
+                funcionCondicion: [tipoOperacion],
+                opciones: {
+                    salida: {
+                        destino: "stock",
+                        identificador: "salida",
+                        nombre: "Salidas stock",
+                        atributoImputables: {
+                            funcion: {
+                                disponibles: [pagoParcialImporte, "cantidadSalidas", "disponibles"],
+                                estado: [pagoParcialString, "cantidadSalidas", { parcial: "Salida parcial", cerrado: "Salida total" }],
 
-                    },
-                    cambioNombre: {
-                        _id: "idComprobante",
-                    },
-                },
-                grabarEnOrigen: { Número: "numerador" },
-                grabarEnOrigenColeccion: { Número: "numerador" },
-                grabarEnDestino: { Número: "numerador" },
+                            },
+                            cambioNombre: {
+                                _id: "idComprobante",
+                            },
+                        },
+                        grabarEnOrigen: { Número: "numerador" },
+                        grabarEnOrigenColeccion: { Número: "numerador" },
+                        grabarEnDestino: { Número: "numerador" },
+                    }
+                }
+
             },
         },
         key: "numerador",

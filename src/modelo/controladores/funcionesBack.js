@@ -351,7 +351,7 @@ function monedasCotis(monedas) {
         }
     } else {
 
-        monedasReturn += `&filtroDolar=1&filtroEuro=1`
+        monedasReturn += `&filtroDolar=1&filtroEuro=1&filtroReal=1`
 
     }
 
@@ -376,43 +376,30 @@ async function obtenerBNAporFecha(fechas, monedas) {
                 const trs = $(table).find("tr");
 
                 if (trs.length > 0) {
-
-
                     trs.each((i, tr) => {
-
-                        let tds = $(tr).find("td");//aqui
+                        let tds = $(tr).find("td");
 
                         let moneda = $(tds[0]).text().trim();
                         let compra = parseFloat($(tds[1]).text().trim().replace(",", "."));
                         let venta = parseFloat($(tds[2]).text().trim().replace(",", "."));
                         let fecha = $(tds[3]).text().trim();
 
-                        // normalizar monedas “cada 100”
                         if (moneda.includes("(*)")) {
                             moneda = moneda.replace("(*)", "").trim();
                             compra /= 100;
                             venta /= 100;
                         }
 
-
                         const key = `${fecha}-${moneda}`;
-
                         if (!vistos.has(key)) {
                             vistos.add(key);
-
                             historicos.push({ fecha, moneda, compra, venta });
                             fechasBuscadas.push(fecha);
                         }
                     });
-
                 } else {
-
-                    let fechaDef = `${fecha[0]}/${fecha[1]}/${fecha[2]}`;
-                    let monedaDef = $($("h4").get(indice)).text().trim();
-                    historicos.push({ fecha: fechaDef, moneda: monedaDef, compra: "Sin cotizaciones", venta: "Sin cotizaciones" });
-                    fechasBuscadas.push(fechaDef);
-
-
+                    // “Sin cotizaciones” -> no hago nada
+                    return;
                 }
             });
             fechasBuscadas.push(`${fecha[0]}-${fecha[1]}-${fecha[2]}`);

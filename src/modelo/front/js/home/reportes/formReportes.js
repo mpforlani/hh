@@ -68,8 +68,8 @@ function fechaCabeceraReportes(objeto, numeroForm) {
     let fechaDesde = addDay(objeto.cabeceraCont.fecha[0], objeto.cabeceraCont.fecha[1], 0, 0, "y-m-d")
 
     let cabecera = `<div class="divCabecera alignitemsCenter fechaTablaReporte ${objeto.cabeceraCont.fecha[2]}">
-      <div class="divDesde margin-right-uno"><p class="centroVertical margin-right-ceroTres">Desde:</p><input type="date" class="fechaTextoDeReporte" value=${fechaDesde}></div>
-      <div class="divHasta"><p class="centroVertical margin-right-ceroTres">Hasta:</p><input type="date" class="fechaTextoHastaReporte" value=${fechaHasta}></div>
+      <div class="divDesde margin-right-uno"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Desde:</p><input type="date" class="fechaTextoDeReporte" value=${fechaDesde}></div>
+      <div class="divHasta"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Hasta:</p><input type="date" class="fechaTextoHastaReporte" value=${fechaHasta}></div>
       </div>`
 
     let cab = $(cabecera);
@@ -88,8 +88,8 @@ function rangoFechasReportes(objeto, numeroForm) {
     const monthSixMonthsAg = ('0' + (sixMonthsAgo.getMonth() + 1)).slice(-2);
 
     let cabecera = `<div class="divCabecera mesesPicker">
-    <div class="fechaHasta"><p class="centroVertical margin-right-ceroTres">Hasta:</p><input type="month" class="MesReporteHasta" name="monthPickerDesde" value="${year}-${month}"></div>
-    <div class="fechaDesde"><p class="centroVertical margin-right-ceroTres">Desde:</p><input type="month" class="MesReporteDesde" name="monthPickerHasta" value="${yearSixMonthsAg}-${monthSixMonthsAg}"></div>
+    <div class="fechaHasta"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Hasta:</p><input type="month" class="MesReporteHasta" name="monthPickerDesde" value="${year}-${month}"></div>
+    <div class="fechaDesde"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Desde:</p><input type="month" class="MesReporteDesde" name="monthPickerHasta" value="${yearSixMonthsAg}-${monthSixMonthsAg}"></div>
     </div>`;
     let cab = $(cabecera);
     cab.appendTo(`#bf${numeroForm}`);
@@ -99,8 +99,8 @@ function cabeceraSaldo(objeto, numeroForm) {
     let saldoInicial = objeto.saldoInicial ?? 0
     let saldoFinal = objeto.saldoFinal ?? 0
     let cabecera = `<div class="divCabecera atributosParametricos">
-      <div class="primerDiv selecAtributo"><p>Saldo Inicial:</p><div class="saldoInicial textoCentrado transparente bord formatoNumero cabecera" style="min-width: 7rem" name="saldoInicial" value=${saldoInicial}></div>
-      <div class="primerDiv selecAtributo"><p>Saldo Final:</p><div class="saldoFinal textoCentrado transparente bord formatoNumero cabecera" style="min-width: 7rem" value=${saldoFinal}></div>
+      <div class="primerDiv selecAtributo row"><p class="fsOnce centroVertical noWrap interSans margin-right-ceroTres">Saldo Inicial:</p><div style="min-width: 7rem" class="saldoInicial centrado transparente bordCinco interSans alignitemsCenter" name="saldoInicial" value=${saldoInicial}></div>
+      <div class="primerDiv selecAtributo row"><p class="fsOnce centroVertical noWrap interSans margin-right-ceroTres">Saldo Final:</p><div style="min-width: 7rem" class="saldoFinal centrado transparente bordCinco interSans alignitemsCenter" name="saldoFinal" value=${saldoFinal}></div>
       </div>`
 
     let cab = $(cabecera);
@@ -112,7 +112,7 @@ async function cabeceraAtributoParametrica(objeto, numeroForm) {
 
     for (const pest of objeto.cabeceraCont.parametrica) {
 
-        cabecera += `<div class="selecAtributo ${pest.clases || ""}"><p>${pest.titulo}:</p>`//crear display row, 
+        cabecera += `<div class="selecAtributo row interSans ${pest.clases || ""}"><p class="fsOnce centroVertical margin-right-ceroTres">${pest.titulo}:</p>`
         cabecera += await cargarPestanasCabecera(objeto, pest.atributo)
         cabecera += `</div>`;
     }
@@ -127,7 +127,7 @@ async function cabeceraAtributoParametricaDef(objeto, numeroForm) {
 
     for (const pest of Object.values(objeto.cabeceraCont.parametricaDef)) {
 
-        cabecera += `<div class="selecAtributo ${pest.nombre}"  type="${pest.type}"><h3>${pest.titulo}:</h3>`
+        cabecera += `<div class="selecAtributo row interSans ${pest.nombre}" type="${pest.type}"><p class="fsOnce centroVertical margin-right-ceroTres">${pest.titulo}:</p>`
         cabecera += pestanaCabeceraInformePrevalores(objeto, numeroForm, pest, { select: "function" })
         cabecera += `</div>`;
 

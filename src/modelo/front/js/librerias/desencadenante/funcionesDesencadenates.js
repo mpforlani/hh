@@ -337,3 +337,10 @@ function redondearImporteMayorDesen(data, atributo) {
         return Math.ceil(data[atributo]);
     }
 }
+function tipoOperacion(response) {
+    console.log(response)
+    let tipoOperacion = (response.operacionStock).toLowerCase()
+    console.log(tipoOperacion)
+
+    return tipoOperacion
+}

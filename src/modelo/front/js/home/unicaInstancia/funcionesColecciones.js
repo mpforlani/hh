@@ -1406,7 +1406,7 @@ function consultaStock(objeto, numeroForm) {
 
         let operacion = $(`#t${numeroForm} .inputSelect.operacionStock`).val();
         if (operacion == "Ajuste") return; // permite ajustar al negativo
-
+        console.log(operacion)
 
         let tipo = obtenerTipoDesdeEvento(e);
         if (!tipo) return;
@@ -1503,6 +1503,9 @@ function salidaStock(objeto, numeroForm) {
     let ingresoPendiente = "";
 
     function cartelIngresos(e) {
+        let operacionCab = $(`#t${numeroForm} .inputSelect.operacionStock`).val();
+        console.log(operacionCab)
+        if (operacionCab == "Ajuste") return; // permite ajustar al negativo
 
         ingresoPendiente = $(e.target).parents("tr");
 
@@ -1513,7 +1516,7 @@ function salidaStock(objeto, numeroForm) {
         let productoFila = $(".divSelectInput[name='producto']", ingresoPendiente).val();
         let operacionInput = $(`#t${numeroForm} .inputSelect.operacionStock`).val();
         let operacion = "Ajuste"
-
+        console.log(operacionInput)
         if (operacionInput == "Salida") {
             operacion = "Entrada"
         }
@@ -1626,5 +1629,24 @@ function completaConCodigo(objeto, numeroForm) {
     }
 
     $(`#t${numeroForm}`).on("change", "table.movimientoStock input.codigoDeBarras", completarAtributos);
+
+}
+function ajustesSalida(objeto, numeroForm) {
+
+    function ocultarAtributosAjustes(e) {
+        let operacionCab = $(`#t${numeroForm} .inputSelect.operacionStock`).val();
+        if (operacionCab == "Ajuste") {
+            $(`#t${numeroForm} td.disponibles`).addClass("oculto");
+            $(`#t${numeroForm} th.disponibles`).addClass("oculto");
+            $(`#t${numeroForm} td.cantidadSalidas`).addClass("oculto");
+            $(`#t${numeroForm} th.cantidadSalidas`).addClass("oculto");
+        } else {
+            $(`#t${numeroForm} td.disponibles`).removeClass("oculto");
+            $(`#t${numeroForm} th.disponibles`).removeClass("oculto");
+            $(`#t${numeroForm} td.cantidadSalidas`).removeClass("oculto");
+            $(`#t${numeroForm} th.cantidadSalidas`).removeClass("oculto");
+        }
+    }
+    $(`#t${numeroForm}`).on("change", ".inputSelect.operacionStock", ocultarAtributosAjustes);
 
 }

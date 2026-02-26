@@ -753,27 +753,44 @@ function cotizacionMonedaExtranjera(objeto, numeroForm, nombreTab) {
     console.log(consultaGet[numeroForm][nombreTab])
     $.each(consultaGet[numeroForm][nombreTab], (indice, value) => {
 
-        console.log(indice)
-        console.log(value)
+        value.reverse()
 
-        tabla += `<div class="tituloTabla"><p>${indice || ""}</p></div>`
         tabla += `<table tablaRef="${indice}">`
         tabla += `<tr class="titulosFila">`
+        tabla += `<th>${indice || ""}</th>`
 
-        $.each()
+        $.each(value, (ind, val) => {
 
+            tabla += `<th>${val.fecha}</th>`
 
+        })
+
+        tabla += `</tr>`
+        tabla += `<tr class="compra">`
+        tabla += `<td>Compra</td>`
+
+        $.each(value, (ind, val) => {
+
+            tabla += `<td class="textoCentrado">${val.compra}</td>`
+
+        })
+
+        tabla += `</tr>`
+
+        tabla += `<tr class="venta">`
+        tabla += `<td>Venta</td>`
+
+        $.each(value, (ind, val) => {
+
+            tabla += `<td class="textoCentrado">${val.venta}</td>`
+        })
 
         tabla += `</tr>`
         tabla += `</table>`
 
-
-
-
     })
 
     $(tabla).appendTo(`#t${numeroForm}`);
-
 
 
 }

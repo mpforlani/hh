@@ -306,37 +306,33 @@ let variablesModeloTesoreria = {
                 type: "cotizacionMonedaExtranjera",
                 datos: "cotizaciones",
                 entidad: "cotizacionMonedaExtranjera",
+                clases: {
+                    table: ["white"]
+                },
             },
         },
         cabeceraCont: {
+            //  parametrica: [{ atributo: P("moneda"), titulo: "Moneda" }],
             parametricaDef: {
-                estado: {
-                    nombre: "estado",
+                moneda: {
+                    nombre: "moneda",
+                    titulo: "Moneda",
+                    type: "cabecera",
                     clases: ["function"],
                     select: {
                         opciones: {
-                            titulos: [`Abiertos`, `Cerrados`, `Todos`],
-                            valores: ["abierto", "cerrado", "todos"]
+                            titulos: [`Dolar`, `Euro`, `Todas`],
+                            valores: [`Dolar`, `Euro`, ""]
                         },
                         inicio: {
-                            titulo: "Abiertos",
+                            titulo: "Todas",
                             valores: ""
                         }
                     },
-                    infoAtr: {
-                        Abiertos: { or: [{ estado: "" }, { estado: { $exists: false } }] },
-                        Cerrados: { nor: [{ estado: "" }, { estado: { $exists: false } }] },
-                        Todos: { todos: {} }
-                    },
-                    function: [pestanaFiltro, ["estado"]],
-                    functionChange: {
-                        ocultarFechaReporte: [ocultarFechaReporte, ["estado", "Abiertos"]]
-                    }
-
+                    function: [monedaCotis, []],
                 }
             },
             fecha: [Date.now(), -30],
-            botones: [{ boton: iLupaRep }],
 
         },
         pest: `Cotizacion Moneda Extranjera`,
