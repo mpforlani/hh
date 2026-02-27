@@ -104,7 +104,7 @@ let variablesModelo = {
     productosVencimientos: variablesModeloReportes.productosVencimientos
 }
 
-$.each(variablesIniciales.entidades, (indice, value) => {
+$.each(variablesIniciales?.entidades || {}, (indice, value) => {
 
     variablesModelo[indice] = objetoFusionEntidad(indice)
 })

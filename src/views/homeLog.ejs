@@ -10,10 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
-    <!--letra Form Individual-->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khojki&display=swap" rel="stylesheet">
-    <!--letra Menu izquierda-->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khojki&display=swap" rel="stylesheet">  <!--letra Menu izquierda-->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"> 
+    <!--Roboto-->
     <!--letra Pestana-->
     <!--GOOGLE ICONs-->
     <link rel="stylesheet"
@@ -41,95 +40,64 @@
     <!-- Creacion formulario individual-->
     <div id="formularioIndividual"></div>
     <div id="formularioVistaPrevia"></div>
+    
     <!-- Creacion Menu contextual-->
     <div id="menuContextual"></div>
     <div id="impresionFormulario"></div>
-
-    <div id="canvas_container">
-        <div class="crossForm">
-            <div>+</div>
-        </div>
-
-        <embed id="vistaPrevia" src="">
-
-    </div>
-    <div class="load">
-
-    </div>
+   <div id="visorPdf" class="oculto"></div>
+    <div class="load"> </div>
     <div>
         <input id="oculto" value="<%=username %>">
         <input id="ocultoUser" value="<%=userPermisos %>">
+  
     </div>
+    
+
     <!--JQUERY-->
     <script src="/js/librerias/jquery-3.4.1.min.js"></script>
-    <script src="/js/librerias/patoLibrary.js"></script>
-    <!--PRINTJS-->
-    <script src="/js/librerias/print.min.js"></script>
-    <!--CARTEL ERROR-->
-    <script src="/js/librerias/acumulador.js"></script>
-    <script src="/js/librerias/cartelError.js"></script>
-    <script src="/js/librerias/fechas.js"></script>
-    <script src="/js/librerias/desencadenante.js"></script>
-    <script src="/js/librerias/pestanas.js"></script>
-    <script src="/js/librerias/funcionesDeAtributos.js"></script>
-     <!--FUNCIONES GRALES-->
-     <script src="/js/home/funcionesGrales/funcionesFormato.js"></script>
-    <!--MODULOS-->
-    <script src="/js/home/modulos/logistica.js"></script>
-    <!--SBC -->
-    <script src="/js/formAbmSbc.js"></script>
-    <script src="/js/home/abm/formAbm.js"></script>
-    <script src="/js/home/abm/crearAbm.js"></script>
-    <script src="/js/home/abm/cabeceraAbm.js"></script>
-    <!--Funciones form individual-->
-    <script src="/js/home/variablesIniciales/atributosEnForm.js"></script>
-    <script src="/js/home/unicaInstancia/formUnicaInstancia.js"></script>
-    <script src="/js/home/unicaInstancia/funcionesColecciones.js"></script>
-    <!--FUNCIONES DE ATRIBUTOS INICIALES-->
-    <script src="/js/home/funcionesGrales/monedasTotales.js"></script>
-    <!--TABLA DOBLE -->
-    <script src="/js/home/tablaDoble/crearDobleEntradaPest.js"></script>
-    <script src="/js/home/tablaDoble/formDobleTabla.js"></script><!--1-->
-    <!--VARIABLES INICIALES-->
-    <script src="/js/home/variablesIniciales/onElementGrales.js"></script>
-    <script src="/js/home/variablesIniciales/botones.js"></script>
-    <script src="/js/home/variablesIniciales/atributosSimples.js"></script>
-    <script src="/js/variablesIniciales/atributosSimplesSbc.js"></script><!-- Esta es de la aplicación  pero lo meto aca asi esta cuando cargo-->
-    <script src="/js/home/variablesIniciales/variablesIniciales.js"></script>
-    <script src="/js/home/variablesIniciales/atributosCompuestos.js"></script>
-    <!--REPORTES-->
-    <script src="/js/home/reportes/atributosEnCelda.js"></script>
-    <script src="/js/home/reportes/tiposdeTabla.js"></script>
-    <script src="/js/home/reportes/funcionesReportes.js"></script>
-    <script src="/js/home/reportes/partesReporte.js"></script>
-    <script src="/js/home/reportes/construccionReportes.js"></script>
-    <!--ABM -->
-    <script src="/js/home/aprobacion/aprobacion.js"></script>
-    <!--UNICA INSTANCIA -->
-    <script src="/js/home/unicaInstancia/crearFormUnicaInst.js"></script>
-    <!--ayuda-->
-    <script src="/js/ayuda/ayudaAbm.js"></script>
-    <!--impresion-->
-    <script src="/js/impresion/impresionFormularios.js"></script>
-    <!--VARIABLES INICIALES-->
-    <script src="/js/home/funcionalidades/base.js"></script>
-    <script src="/js/home/funcionalidades/cobrosYPagos.js"></script>
-    <script src="/js/home/funcionalidades/crm.js"></script>
-    <script src="/js/home/funcionalidades/generales.js"></script>
-    <script src="/js/home/funcionalidades/logistica.js"></script>
-    <script src="/js/home/funcionalidades/tesoreria.js"></script>
-    <script src="/js/funcionalidades/logistica.js"></script>
-    <script src="/js/home/funcionalidades/reportes.js"></script>
-    <script src="/js/funcionalidades/reportes.js"></script><!-- Esta es de la aplicación  pero lo meto aca asi esta cuando cargo-->
-    <script src="/js/funcionalidades/cobrosYPagos.js"></script>
-    <script src="/js/home/funcionalidades/objetos y funciones modelos.js"></script>
-    <script src="/js/funcionalidades/objetos y funciones iniciales.js"></script>
-    <script src="/js/home/variablesIniciales/menuInicio.js"></script>
-    <script src="/js/variablesIniciales/variables iniciales Sbc.js"></script>
-    <!--SEGURIDAD-->
-    <!--Va ultimo seguridad una vez que todas las funciones y variables esten cargadas ahi le aplico seguridad-->
-    <script src="/js/inicioHome.js"></script>
-    <script src="/js/home/variablesIniciales/seguridad.js"></script>
+    <!--CUSTOM-->
+    <script src="/js/inicioScripts.js"></script>
+    <script src="/js/inicioLocalScripts.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/js/librerias/sortable.js"></script>
+<script>
+/*(function () {
+  // Obtener o generar deviceId
+  let deviceId = localStorage.getItem("deviceId");
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("deviceId", deviceId);
+  }
+
+  // Interceptar todos los fetch y agregar deviceId
+  const originalFetch = window.fetch;
+  window.fetch = function (url, options = {}) {
+    options.headers = options.headers || {};
+    options.headers['X-Device-Id'] = deviceId;
+
+    return originalFetch(url, options).then(res => {
+      if (res.status === 401) {
+        window.location.href = "/";
+        return new Promise(() => {}); // detiene la ejecución del .then siguiente
+      }
+      return res;
+    });
+  };
+
+  // Agregar deviceId a todos los formularios HTML
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("form").forEach(form => {
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = "deviceId";
+      hidden.value = deviceId;
+      form.appendChild(hidden);
+    });
+  });
+})();*/
+</script>
 
 
+</body>
 </html>
