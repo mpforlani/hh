@@ -14,6 +14,7 @@ const paginasLocales = {
         primero: [
 
             "/js/funcionalidades/objetos y funciones iniciales.js",
+            "/js/funcionalidades/reportes.js",
 
         ]
     },

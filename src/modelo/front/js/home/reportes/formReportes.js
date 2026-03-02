@@ -68,8 +68,8 @@ function fechaCabeceraReportes(objeto, numeroForm) {
     let fechaDesde = addDay(objeto.cabeceraCont.fecha[0], objeto.cabeceraCont.fecha[1], 0, 0, "y-m-d")
 
     let cabecera = `<div class="divCabecera alignitemsCenter fechaTablaReporte ${objeto.cabeceraCont.fecha[2]}">
-      <div class="divDesde margin-right-uno"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Desde:</p><input type="date" class="fechaTextoDeReporte" value=${fechaDesde}></div>
-      <div class="divHasta"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Hasta:</p><input type="date" class="fechaTextoHastaReporte" value=${fechaHasta}></div>
+      <div class="divDesde margin-right-uno"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Desde:</p><input type="date" class="fechaTextoDeReporte" value=${fechaDesde} ${autoCompOff} ></div>
+      <div class="divHasta"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Hasta:</p><input type="date" class="fechaTextoHastaReporte" value=${fechaHasta} ${autoCompOff} ></div>
       </div>`
 
     let cab = $(cabecera);
@@ -88,8 +88,8 @@ function rangoFechasReportes(objeto, numeroForm) {
     const monthSixMonthsAg = ('0' + (sixMonthsAgo.getMonth() + 1)).slice(-2);
 
     let cabecera = `<div class="divCabecera mesesPicker">
-    <div class="fechaHasta"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Hasta:</p><input type="month" class="MesReporteHasta" name="monthPickerDesde" value="${year}-${month}"></div>
-    <div class="fechaDesde"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Desde:</p><input type="month" class="MesReporteDesde" name="monthPickerHasta" value="${yearSixMonthsAg}-${monthSixMonthsAg}"></div>
+    <div class="fechaHasta"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Hasta:</p><input type="month" class="MesReporteHasta" name="monthPickerDesde" value="${year}-${month}" ${autoCompOff} ></div>
+    <div class="fechaDesde"><p class="fsOnce centroVertical interSans margin-right-ceroTres">Desde:</p><input type="month" class="MesReporteDesde" name="monthPickerHasta" value="${yearSixMonthsAg}-${monthSixMonthsAg}" ${autoCompOff} ></div>
     </div>`;
     let cab = $(cabecera);
     cab.appendTo(`#bf${numeroForm}`);
@@ -112,7 +112,7 @@ async function cabeceraAtributoParametrica(objeto, numeroForm) {
 
     for (const pest of objeto.cabeceraCont.parametrica) {
 
-        cabecera += `<div class="selecAtributo row interSans ${pest.clases || ""}"><p class="fsOnce centroVertical margin-right-ceroTres">${pest.titulo}:</p>`
+        cabecera += `<div class="primerDiv selecAtributo row interSans ${pest.clases || ""}"><p class="fsOnce centroVertical margin-right-ceroTres">${pest.titulo}:</p>`
         cabecera += await cargarPestanasCabecera(objeto, pest.atributo)
         cabecera += `</div>`;
     }
@@ -127,7 +127,7 @@ async function cabeceraAtributoParametricaDef(objeto, numeroForm) {
 
     for (const pest of Object.values(objeto.cabeceraCont.parametricaDef)) {
 
-        cabecera += `<div class="selecAtributo row interSans ${pest.nombre}" type="${pest.type}"><p class="fsOnce centroVertical margin-right-ceroTres">${pest.titulo}:</p>`
+        cabecera += `<div class="primerDiv selecAtributo row interSans ${pest.nombre}" type="${pest.type}"><p class="fsOnce centroVertical margin-right-ceroTres">${pest.titulo}:</p>`
         cabecera += pestanaCabeceraInformePrevalores(objeto, numeroForm, pest, { select: "function" })
         cabecera += `</div>`;
 
@@ -240,6 +240,767 @@ function cabeceraSimple(objeto, numeroForm) {
     let cab = $(cabecera);
     cab.appendTo('#comandera');
 
+}
+const resizeTablaReportesState = {}
+const sortableColumnasReportes = {}
+const sortableFilasReportes = {}
+const resizeCookiePrefixReportes = "gf_resize_rep_v1"
+function hashResizeReporte(texto) {
+
+    let hash = 5381
+    const str = `${texto || ""}`
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) + hash) + str.charCodeAt(i)
+    }
+    return (hash >>> 0).toString(36)
+}
+function sanitizarColIdReporte(texto) {
+
+    const limpio = `${texto || "col"}`
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_-]/g, "")
+    return limpio || "col"
+}
+function normalizarOrdenDesdeCookieReporte(valor) {
+
+    if (Array.isArray(valor)) {
+        return valor.map((v) => `${v}`).filter((v) => v !== "")
+    }
+
+    if (valor && typeof valor === "object") {
+        return Object.entries(valor)
+            .sort((a, b) => (parseInt(a[1], 10) || 0) - (parseInt(b[1], 10) || 0))
+            .map(([colId]) => `${colId}`)
+            .filter((v) => v !== "")
+    }
+
+    if (typeof valor === "string") {
+        return valor
+            .split(",")
+            .map((v) => v.trim())
+            .filter((v) => v !== "")
+    }
+
+    return []
+}
+function esReferenciaIndiceReporte(ref) {
+
+    if (typeof ref === "number") return Number.isFinite(ref)
+    if (typeof ref !== "string") return false
+
+    const texto = ref.trim()
+    if (texto === "") return false
+
+    return /^-?\d+$/.test(texto)
+}
+function esHeaderDraggeableReporte(th) {
+
+    if (!th?.length) return false
+    if (th.hasClass("_id") || th.hasClass("oculto") || th.hasClass("transparent")) return false
+    if (th.attr("oculto") === "true") return false
+    return th.is(":visible")
+}
+function normalizarRowIdReporte(valor, indice) {
+
+    const base = sanitizarColIdReporte(valor || `fila_${indice}`)
+    const hash = hashResizeReporte(valor || `fila_${indice}`).slice(0, 8)
+    return `row_${base}_${hash}`
+}
+function esFilaDraggeableReporte(tr) {
+
+    if (!tr?.length) return false
+    if (tr.hasClass("titulosFila") || tr.hasClass("segunFilaTitulos") || tr.hasClass("filtros") || tr.hasClass("filaTotal")) return false
+    return tr.is(":visible")
+}
+function normalizarTablaStateReporte(rawState) {
+
+    if (!rawState || typeof rawState !== "object" || Array.isArray(rawState)) {
+        return { columnas: {}, orden: [], filas: [] }
+    }
+
+    if (rawState.columnas !== undefined || rawState.orden !== undefined || rawState.filas !== undefined) {
+        return {
+            columnas: (typeof rawState.columnas === "object" && !Array.isArray(rawState.columnas)) ? rawState.columnas : {},
+            orden: normalizarOrdenDesdeCookieReporte(
+                rawState?.orden ??
+                rawState?.order ??
+                rawState?.columnas?.orden
+            ),
+            filas: normalizarOrdenDesdeCookieReporte(
+                rawState?.filas ??
+                rawState?.rows ??
+                rawState?.rowOrder
+            )
+        }
+    }
+
+    return {
+        columnas: rawState,
+        orden: [],
+        filas: []
+    }
+}
+function getTableStateReporte(state, tableKey) {
+
+    const normalizado = normalizarTablaStateReporte(state?.tablas?.[tableKey])
+    state.tablas[tableKey] = normalizado
+    return normalizado
+}
+function obtenerDeviceResizeIdReporte() {
+
+    const key = "gesfin_device_resize_id"
+    try {
+        let id = localStorage.getItem(key)
+        if (!id) {
+            id = `dv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
+            localStorage.setItem(key, id)
+        }
+        return id
+    } catch (error) {
+        return `ua_${hashResizeReporte(navigator.userAgent || "sin_ua")}`
+    }
+}
+function nombreCookieResizeReporte(scopeKey) {
+
+    return `${resizeCookiePrefixReportes}_${hashResizeReporte(scopeKey)}`
+}
+function setCookieResizeReporte(nombre, valor, dias = 365) {
+
+    const ms = dias * 24 * 60 * 60 * 1000
+    const expires = new Date(Date.now() + ms).toUTCString()
+    document.cookie = `${nombre}=${encodeURIComponent(valor)}; expires=${expires}; path=/; SameSite=Lax`
+}
+function getCookieResizeReporte(nombre) {
+
+    const nombreEq = `${nombre}=`
+    const partes = document.cookie.split(";")
+
+    for (const parte of partes) {
+        const c = parte.trim()
+        if (c.indexOf(nombreEq) === 0) {
+            return decodeURIComponent(c.substring(nombreEq.length))
+        }
+    }
+    return ""
+}
+function getScopeResizeReporte(objeto) {
+
+    const usuario = usu || "anonimo"
+    const dispositivo = obtenerDeviceResizeIdReporte()
+    const empresa = empresaSeleccionada?._id || "sin_empresa"
+    const reporte = objeto?.nombre || objeto?.accion || objeto?.pest || "reporte"
+
+    return `${usuario}|${dispositivo}|${empresa}|${reporte}`
+}
+function cargarResizeCookieReporte(scopeKey) {
+
+    try {
+        const nombre = nombreCookieResizeReporte(scopeKey)
+        const valor = getCookieResizeReporte(nombre)
+        if (!valor) return { tablas: {} }
+
+        const parseado = JSON.parse(valor)
+        const tablasParseadas = {}
+        const tablasRaw = parseado?.tablas || {}
+
+        $.each(tablasRaw, (tableKey, tableState) => {
+            tablasParseadas[tableKey] = normalizarTablaStateReporte(tableState)
+        })
+
+        return { tablas: tablasParseadas }
+    } catch (error) {
+        return { tablas: {} }
+    }
+}
+function guardarResizeCookieReporte(state) {
+
+    if (!state?.scopeKey) return
+    const nombre = nombreCookieResizeReporte(state.scopeKey)
+    const payload = JSON.stringify({ tablas: state.tablas || {} })
+    setCookieResizeReporte(nombre, payload, 365)
+}
+function getResizeStateReportes(numeroForm, objeto) {
+
+    if (!resizeTablaReportesState[numeroForm]) {
+        const scopeKey = getScopeResizeReporte(objeto)
+        const persistido = cargarResizeCookieReporte(scopeKey)
+
+        resizeTablaReportesState[numeroForm] = {
+            scopeKey,
+            tablas: persistido.tablas || {}
+        }
+    }
+    return resizeTablaReportesState[numeroForm]
+}
+function obtenerFilaTitulosReporte(tabla) {
+
+    const filaTitulos = tabla.find("tr.titulosFila").first()
+    if (filaTitulos.length) return filaTitulos
+    return tabla.find("tr").first()
+}
+function asignarColIdsTablaReporte(tabla) {
+
+    const filaTitulos = obtenerFilaTitulosReporte(tabla)
+    if (!filaTitulos.length) return
+
+    const headers = filaTitulos.children("th, td")
+    if (!headers.length) return
+
+    const usados = new Set()
+    const mapaIndices = []
+
+    headers.each((indice, header) => {
+        const th = $(header)
+        let colId = th.attr("data-col-id")
+
+        if (!colId) {
+            const refAtributo = th.attr("atributo") || th.attr("colum") || `col_${indice}`
+            const baseId = sanitizarColIdReporte(refAtributo)
+            colId = `${baseId}_${indice}`
+            let intento = 1
+            while (usados.has(colId)) {
+                colId = `${baseId}_${indice}_${intento}`
+                intento++
+            }
+        }
+
+        usados.add(colId)
+        th.attr("data-col-id", colId)
+        mapaIndices[indice] = colId
+    })
+
+    tabla.find("tr").each((_, fila) => {
+        $(fila).children("th, td").each((indice, celda) => {
+            const celdaJq = $(celda)
+            if (celdaJq.attr("data-col-id")) return
+            const colId = mapaIndices[indice]
+            if (!colId) return
+            celdaJq.attr("data-col-id", colId)
+        })
+    })
+}
+function obtenerFilaIdReporte(tr, indice) {
+
+    const fila = $(tr)
+    const existente = fila.attr("data-row-id")
+    if (existente) return existente
+
+    const celdaId = fila.children("td._id, th._id").first()
+    const idInput = celdaId.find("input").val()
+    const idTexto = celdaId.text()?.trim()
+    const atributoFila = fila.attr("fila") || fila.attr("idregistro")
+
+    if (idInput || idTexto || atributoFila) {
+        return normalizarRowIdReporte(idInput || idTexto || atributoFila, indice)
+    }
+
+    const resumenFila = fila.children("td, th").slice(0, 5).map((_, celda) => $(celda).text().trim()).get().join("|")
+    return normalizarRowIdReporte(resumenFila || `fila_${indice}`, indice)
+}
+function asignarRowIdsTablaReporte(tabla) {
+
+    const filas = tabla.children("tr").filter((_, tr) => esFilaDraggeableReporte($(tr)))
+    const usados = new Set()
+
+    filas.each((indice, tr) => {
+        let rowId = obtenerFilaIdReporte(tr, indice)
+        if (!rowId) return
+
+        let intento = 1
+        while (usados.has(rowId)) {
+            rowId = `${rowId}_${intento}`
+            intento++
+        }
+
+        usados.add(rowId)
+        $(tr).attr("data-row-id", rowId)
+    })
+}
+function obtenerOrdenHeadersDragReporte(tabla) {
+
+    const filaTitulos = obtenerFilaTitulosReporte(tabla)
+    if (!filaTitulos.length) return []
+
+    return filaTitulos
+        .children("th, td")
+        .filter((_, header) => esHeaderDraggeableReporte($(header)))
+        .map((_, header) => $(header).attr("data-col-id"))
+        .get()
+        .filter((colId) => !!colId)
+}
+function obtenerOrdenFilasDragReporte(tabla) {
+
+    return tabla
+        .children("tr")
+        .filter((_, tr) => esFilaDraggeableReporte($(tr)))
+        .map((_, tr) => $(tr).attr("data-row-id"))
+        .get()
+        .filter((rowId) => !!rowId)
+}
+function normalizarOrdenColIdsReporte(ordenGuardado, colIdsActuales) {
+
+    const actualesSet = new Set(colIdsActuales)
+    const orden = []
+
+    if (Array.isArray(ordenGuardado)) {
+        for (const colId of ordenGuardado) {
+            if (!actualesSet.has(colId)) continue
+            if (orden.includes(colId)) continue
+            orden.push(colId)
+        }
+    }
+
+    for (const colId of colIdsActuales) {
+        if (!orden.includes(colId)) orden.push(colId)
+    }
+
+    return orden
+}
+function normalizarOrdenFilasReporte(ordenGuardado, rowIdsActuales) {
+
+    const actualesSet = new Set(rowIdsActuales)
+    const orden = []
+
+    if (Array.isArray(ordenGuardado)) {
+        for (const rowId of ordenGuardado) {
+            if (!actualesSet.has(rowId)) continue
+            if (orden.includes(rowId)) continue
+            orden.push(rowId)
+        }
+    }
+
+    for (const rowId of rowIdsActuales) {
+        if (!orden.includes(rowId)) orden.push(rowId)
+    }
+
+    return orden
+}
+function aplicarOrdenTablaReporte(tabla, ordenGuardado) {
+
+    asignarColIdsTablaReporte(tabla)
+    const colIdsActuales = obtenerOrdenHeadersDragReporte(tabla)
+    if (!colIdsActuales.length) return []
+
+    const hayOrdenGuardado = Array.isArray(ordenGuardado) && ordenGuardado.length > 0
+    const ordenFinal = normalizarOrdenColIdsReporte(ordenGuardado, colIdsActuales)
+    if (!hayOrdenGuardado) return ordenFinal
+
+    const idsOrdenados = new Set(ordenFinal)
+    tabla.find("tr").each((_, fila) => {
+        const tr = $(fila)
+        const celdas = tr.children("th, td").toArray()
+        if (!celdas.length) return
+
+        const porId = {}
+        celdas.forEach((celda) => {
+            const colId = celda.getAttribute("data-col-id")
+            if (!colId) return
+            ; (porId[colId] ??= []).push(celda)
+        })
+
+        const usadas = new Set()
+        const ordenadas = []
+        ordenFinal.forEach((colId) => {
+            const grupo = porId[colId] || []
+            grupo.forEach((celda) => {
+                ordenadas.push(celda)
+                usadas.add(celda)
+            })
+        })
+
+        const restantes = celdas.filter((celda) => {
+            const colId = celda.getAttribute("data-col-id")
+            if (!colId) return true
+            if (!idsOrdenados.has(colId)) return true
+            return !usadas.has(celda)
+        })
+
+        tr.append([...ordenadas, ...restantes])
+    })
+
+    return ordenFinal
+}
+function aplicarOrdenFilasTablaReporte(tabla, ordenGuardado) {
+
+    asignarRowIdsTablaReporte(tabla)
+    const filasActuales = tabla.children("tr").filter((_, tr) => esFilaDraggeableReporte($(tr)))
+    if (!filasActuales.length) return []
+
+    const rowIdsActuales = filasActuales
+        .map((_, fila) => $(fila).attr("data-row-id"))
+        .get()
+        .filter((rowId) => !!rowId)
+    if (!rowIdsActuales.length) return []
+
+    const ordenFinal = normalizarOrdenFilasReporte(ordenGuardado, rowIdsActuales)
+    const hayOrdenGuardado = Array.isArray(ordenGuardado) && ordenGuardado.length > 0
+    if (!hayOrdenGuardado) return ordenFinal
+
+    const mapaFilas = {}
+    filasActuales.each((_, fila) => {
+        const rowId = $(fila).attr("data-row-id")
+        if (!rowId) return
+        ; (mapaFilas[rowId] ??= []).push(fila)
+    })
+
+    const ordenadas = []
+    const usadas = new Set()
+    ordenFinal.forEach((rowId) => {
+        const grupo = mapaFilas[rowId] || []
+        grupo.forEach((fila) => {
+            ordenadas.push(fila)
+            usadas.add(fila)
+        })
+    })
+
+    const restantes = filasActuales.toArray().filter((fila) => !usadas.has(fila))
+    const filasFinales = [...ordenadas, ...restantes]
+    const filaTotal = tabla.children("tr.filaTotal").first()
+
+    if (filaTotal.length) filaTotal.before(filasFinales)
+    else tabla.append(filasFinales)
+
+    return ordenFinal
+}
+function obtenerAnchoInicialColumnaReporte(th) {
+
+    if (!th?.length) return 120
+
+    const el = th.get(0)
+    const styles = window.getComputedStyle(el)
+    const maxWidth = parseFloat(styles.maxWidth)
+    if (!Number.isNaN(maxWidth) && Number.isFinite(maxWidth) && maxWidth > 0) return maxWidth
+
+    const width = parseFloat(styles.width)
+    if (!Number.isNaN(width) && Number.isFinite(width) && width > 0) return width
+
+    return th.outerWidth() || 120
+}
+function aplicarAnchoColumnaReporte(tabla, referenciaColumna, anchoPx) {
+
+    const ancho = Math.max(80, Math.round(anchoPx))
+    let columnas = $()
+
+    if (!esReferenciaIndiceReporte(referenciaColumna)) {
+        columnas = tabla.find(`[data-col-id="${referenciaColumna}"]`)
+    }
+
+    if (!columnas.length && esReferenciaIndiceReporte(referenciaColumna)) {
+        const indiceColumna = parseInt(referenciaColumna, 10)
+        tabla.find("tr").each((_, fila) => {
+            const celda = $(fila).children("th, td").eq(indiceColumna)
+            if (!celda.length) return
+            columnas = columnas.add(celda)
+        })
+    }
+
+    if (!columnas.length) return
+
+    columnas.each((_, celda) => {
+        celda.style.setProperty("width", `${ancho}px`, "important")
+        celda.style.setProperty("min-width", `${ancho}px`, "important")
+        celda.style.setProperty("max-width", `${ancho}px`, "important")
+        celda.style.setProperty("flex", `0 0 ${ancho}px`, "important")
+    })
+}
+function aplicarAlturaFilaReporte(fila, altoPx) {
+
+    const alto = Math.max(28, Math.round(altoPx))
+    const elFila = fila.get(0)
+    if (elFila) {
+        elFila.style.setProperty("height", `${alto}px`, "important")
+        elFila.style.setProperty("min-height", `${alto}px`, "important")
+    }
+
+    fila.children("th, td").each((_, celda) => {
+        celda.style.setProperty("height", `${alto}px`, "important")
+        celda.style.setProperty("min-height", `${alto}px`, "important")
+    })
+}
+function getResizeTableKey(table, index) {
+
+    return table.attr("tablaref") || `index_${index}`
+}
+function insertarHandlesResizeReportes(numeroForm) {
+
+    const contenedor = $(`#t${numeroForm}`)
+    if (!contenedor.length) return
+
+    contenedor.find("table").each((indiceTabla, t) => {
+        const tabla = $(t)
+        tabla.attr("data-resize-key", getResizeTableKey(tabla, indiceTabla))
+        asignarColIdsTablaReporte(tabla)
+        asignarRowIdsTablaReporte(tabla)
+
+        const filaTitulos = obtenerFilaTitulosReporte(tabla)
+        const headers = filaTitulos.children("th, td")
+        headers.each((_, header) => {
+            const th = $(header)
+            let contenido = th.children(".th-contenido").first()
+
+            if (!contenido.length) {
+                const envoltorio = $(`<div class="th-contenido"></div>`)
+                th.contents().each((__, nodo) => {
+                    if (nodo.nodeType === 1 && $(nodo).hasClass("resize-col-handle")) return
+                    envoltorio.append(nodo)
+                })
+                th.append(envoltorio)
+                contenido = envoltorio
+            }
+
+            if (!th.children(".resize-col-handle").length) {
+                th.append(`<span class="resize-col-handle" title="Arrastrar para cambiar ancho"></span>`)
+            }
+            if (contenido.length && esHeaderDraggeableReporte(th) && !contenido.children(".reorder-col-handle").length) {
+                contenido.prepend(`<span class="reorder-col-handle" title="Arrastrar para cambiar orden"></span>`)
+            }
+        })
+
+        tabla.find("tr").not(".titulosFila, .segunFilaTitulos, .filtros").each((_, fila) => {
+            const tr = $(fila)
+            if (!tr.children(".resize-row-handle").length) {
+                tr.append(`<span class="resize-row-handle" title="Arrastrar para cambiar alto"></span>`)
+            }
+            if (esFilaDraggeableReporte(tr) && tr.attr("data-row-id") && !tr.children(".reorder-row-handle").length) {
+                tr.append(`<span class="reorder-row-handle" title="Arrastrar para cambiar orden de fila"></span>`)
+            }
+        })
+    })
+}
+function restaurarResizeReportes(numeroForm, objeto) {
+
+    const state = getResizeStateReportes(numeroForm, objeto)
+    const contenedor = $(`#t${numeroForm}`)
+
+    contenedor.find("table").each((_, t) => {
+        const tabla = $(t)
+        const key = tabla.attr("data-resize-key")
+        if (!key) return
+
+        const tableState = getTableStateReporte(state, key)
+        tableState.orden = aplicarOrdenTablaReporte(tabla, tableState.orden)
+        tableState.filas = aplicarOrdenFilasTablaReporte(tabla, tableState.filas)
+
+        $.each(tableState.columnas, (referenciaColumna, ancho) => {
+            aplicarAnchoColumnaReporte(tabla, referenciaColumna, ancho)
+        })
+    })
+}
+function limpiarPreviewDropReporte(numeroForm) {
+
+    $(`#t${numeroForm} .drop-preview-before, #t${numeroForm} .drop-preview-after`).removeClass("drop-preview-before drop-preview-after")
+}
+function marcarPreviewDropReporte(numeroForm, evt, tipo) {
+
+    limpiarPreviewDropReporte(numeroForm)
+    const related = $(evt?.related)
+    if (!related.length) return
+
+    if (tipo === "columna" && related.closest("tr.titulosFila").length === 0) return
+    if (tipo === "fila" && !esFilaDraggeableReporte(related)) return
+
+    related.addClass(evt?.willInsertAfter ? "drop-preview-after" : "drop-preview-before")
+}
+function inicializarReordenamientoColumnasReportes(numeroForm, objeto) {
+
+    const contenedor = $(`#t${numeroForm}`)
+    const state = getResizeStateReportes(numeroForm, objeto)
+    sortableColumnasReportes[numeroForm] = sortableColumnasReportes[numeroForm] || {}
+
+    contenedor.find("table").each((_, t) => {
+        const tabla = $(t)
+        const tableKey = tabla.attr("data-resize-key")
+        if (!tableKey) return
+
+        const filaTitulos = obtenerFilaTitulosReporte(tabla)
+        if (!filaTitulos.length) return
+
+        if (sortableColumnasReportes[numeroForm]?.[tableKey]?.destroy) {
+            sortableColumnasReportes[numeroForm][tableKey].destroy()
+        }
+
+        const headersDrag = filaTitulos
+            .children("th, td")
+            .filter((_, header) => esHeaderDraggeableReporte($(header)))
+
+        if (headersDrag.length < 2) {
+            delete sortableColumnasReportes[numeroForm][tableKey]
+            return
+        }
+
+        sortableColumnasReportes[numeroForm][tableKey] = new Sortable(filaTitulos.get(0), {
+            animation: 120,
+            draggable: "th:not(._id):not(.oculto):not(.transparent):not([oculto='true'])",
+            handle: ".reorder-col-handle",
+            filter: ".resize-col-handle",
+            preventOnFilter: false,
+            direction: "horizontal",
+            swapThreshold: 0.35,
+            invertSwap: true,
+            ghostClass: "sortable-ghost-item",
+            chosenClass: "sortable-chosen-item",
+            dragClass: "sortable-drag-item",
+            onStart: () => {
+                contenedor.addClass("reordering-col")
+                limpiarPreviewDropReporte(numeroForm)
+            },
+            onMove: (evt) => {
+                marcarPreviewDropReporte(numeroForm, evt, "columna")
+                return true
+            },
+            onEnd: () => {
+                const tableState = getTableStateReporte(state, tableKey)
+                const ordenActual = obtenerOrdenHeadersDragReporte(tabla)
+                tableState.orden = aplicarOrdenTablaReporte(tabla, ordenActual)
+                guardarResizeCookieReporte(state)
+                limpiarPreviewDropReporte(numeroForm)
+                contenedor.removeClass("reordering-col")
+            }
+        })
+    })
+}
+function inicializarReordenamientoFilasReportes(numeroForm, objeto) {
+
+    const contenedor = $(`#t${numeroForm}`)
+    const state = getResizeStateReportes(numeroForm, objeto)
+    sortableFilasReportes[numeroForm] = sortableFilasReportes[numeroForm] || {}
+
+    contenedor.find("table").each((_, t) => {
+        const tabla = $(t)
+        const tableKey = tabla.attr("data-resize-key")
+        if (!tableKey) return
+
+        if (sortableFilasReportes[numeroForm]?.[tableKey]?.destroy) {
+            sortableFilasReportes[numeroForm][tableKey].destroy()
+        }
+
+        const filasDrag = tabla.children("tr").filter((_, tr) => esFilaDraggeableReporte($(tr)) && !!$(tr).attr("data-row-id"))
+        if (filasDrag.length < 2) {
+            delete sortableFilasReportes[numeroForm][tableKey]
+            return
+        }
+
+        sortableFilasReportes[numeroForm][tableKey] = new Sortable(tabla.get(0), {
+            animation: 120,
+            draggable: "tr[data-row-id]:not(.titulosFila):not(.segunFilaTitulos):not(.filtros):not(.filaTotal)",
+            handle: ".reorder-row-handle",
+            filter: ".resize-row-handle",
+            preventOnFilter: false,
+            direction: "vertical",
+            swapThreshold: 0.35,
+            invertSwap: true,
+            ghostClass: "sortable-ghost-item",
+            chosenClass: "sortable-chosen-item",
+            dragClass: "sortable-drag-item",
+            onStart: () => {
+                contenedor.addClass("reordering-row")
+                limpiarPreviewDropReporte(numeroForm)
+            },
+            onMove: (evt) => {
+                marcarPreviewDropReporte(numeroForm, evt, "fila")
+                return true
+            },
+            onEnd: () => {
+                const tableState = getTableStateReporte(state, tableKey)
+                const ordenActual = obtenerOrdenFilasDragReporte(tabla)
+                tableState.filas = aplicarOrdenFilasTablaReporte(tabla, ordenActual)
+                guardarResizeCookieReporte(state)
+                limpiarPreviewDropReporte(numeroForm)
+                contenedor.removeClass("reordering-row")
+            }
+        })
+    })
+}
+function inicializarResizeTablaReportes(numeroForm, objeto) {
+
+    const contenedor = $(`#t${numeroForm}`)
+    if (!contenedor.length) return
+
+    insertarHandlesResizeReportes(numeroForm)
+    restaurarResizeReportes(numeroForm, objeto)
+    inicializarReordenamientoColumnasReportes(numeroForm, objeto)
+    inicializarReordenamientoFilasReportes(numeroForm, objeto)
+
+    contenedor.off(".resizeRep")
+    $(document).off(`.resizeRep${numeroForm}`)
+
+    const state = getResizeStateReportes(numeroForm, objeto)
+    let drag = null
+
+    const terminarDrag = () => {
+        drag = null
+        contenedor.removeClass("resizing-col resizing-row")
+        document.body.style.cursor = ""
+    }
+
+    contenedor.on("mousedown.resizeRep", ".resize-col-handle", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const th = $(e.currentTarget).closest("th, td")
+        const tabla = th.closest("table")
+        if (!th.length || !tabla.length) return
+
+        const tableKey = tabla.attr("data-resize-key")
+        if (!tableKey) return
+
+        const referenciaColumna = th.attr("data-col-id") || th.index()
+        drag = {
+            tipo: "columna",
+            tabla,
+            tableKey,
+            referenciaColumna,
+            start: e.pageX,
+            sizeInicial: obtenerAnchoInicialColumnaReporte(th)
+        }
+        contenedor.addClass("resizing-col")
+        document.body.style.cursor = "col-resize"
+    })
+
+    contenedor.on("mousedown.resizeRep", ".resize-row-handle", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const fila = $(e.currentTarget).closest("tr")
+        if (!fila.length) return
+
+        drag = {
+            tipo: "fila",
+            fila,
+            start: e.pageY,
+            sizeInicial: fila.outerHeight() || 32
+        }
+        contenedor.addClass("resizing-row")
+        document.body.style.cursor = "row-resize"
+    })
+
+    $(document).on(`mousemove.resizeRep${numeroForm}`, (e) => {
+        if (!drag) return
+        e.preventDefault()
+
+        if (drag.tipo === "columna") {
+            const nuevoAncho = drag.sizeInicial + (e.pageX - drag.start)
+            aplicarAnchoColumnaReporte(drag.tabla, drag.referenciaColumna, nuevoAncho)
+
+            const tableState = getTableStateReporte(state, drag.tableKey)
+            tableState.columnas[drag.referenciaColumna] = Math.max(80, Math.round(nuevoAncho))
+            return
+        }
+
+        const nuevoAlto = drag.sizeInicial + (e.pageY - drag.start)
+        aplicarAlturaFilaReporte(drag.fila, nuevoAlto)
+    })
+
+    $(document).on(`mouseup.resizeRep${numeroForm}`, () => {
+        if (!drag) return
+
+        if (drag.tipo === "columna") {
+            guardarResizeCookieReporte(state)
+        }
+        terminarDrag()
+    })
 }
 ////Funciones base
 function administrarAtributoTabla(objeto, numeroForm, mo) {
@@ -379,201 +1140,208 @@ function administrarAtributoTabla(objeto, numeroForm, mo) {
                 return (className.match(/\boculto\S*/g) || []).join(' ');
             });
             $(`#t${numeroForm} td.filtro input`).val("")
+            $(`#t${numeroForm} .busquedasColumna`).each((_, columna) => {
+                $(`.filtroCampo`, columna).slice(2).remove();
+            });
         }
 
         $(e.target).parents('table').find('tr.filtros').toggleClass('active');
 
     }
-    const filtros = (e) => {
+    const normalizarTexto = (v) => (v ?? "").toString().toLowerCase().trim();
+    const parseFechaReporte = (valor) => {
+        const texto = (valor ?? "").toString().trim();
+        if (!texto) return null;
 
-        let valorBuscado = $(e.target).val().toLowerCase();
-        let primerCaracter = valorBuscado.slice(0, 1);
-        const tabla = $(e.target).closest("table");
+        const match = texto.match(/\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}-\d{1,2}-\d{1,2}/);
+        if (!match) return null;
 
-        let registros = $(`tr:not(.filaTotal):not(.titulosFila):not(.filtros)`, tabla);
+        const fechaTexto = match[0];
+        let dia, mes, anio;
 
-        let filtrado = $(e.target).attr(`atributo`);
-
-        if (primerCaracter == ">") {
-
-            let tipoFiltrado = $(e.target).attr("type")
-            if (valorBuscado.includes("<")) {
-                let indice = valorBuscado.indexOf("<");
-
-                switch (tipoFiltrado) {
-                    case `fecha`:
-                        let mayorQueFa = valorBuscado.slice(1, indice).split(`/`);
-                        let menorQueFa = valorBuscado.slice(indice + 1).split(`/`);
-                        let mayorQueFecha = new Date(mayorQueFa[1] + `/` + mayorQueFa[0] + `/` + mayorQueFa[2])
-                        let menorQueFecha = new Date(menorQueFa[1] + `/` + menorQueFa[0] + `/` + menorQueFa[2])
-
-
-                        $.each(registros, (indice, value) => {
-
-                            let valorFila = $(value).children(`td.${filtrado}`).text().split(`/`);
-                            let valorFilaFecha = new Date(valorFila[1] + `/` + valorFila[0] + `/` + valorFila[2])
-                            if (valorFilaFecha > mayorQueFecha && valorFilaFecha < menorQueFecha) {
-                                $(value).removeClass(`oculto${filtrado}`);
-                            } else {
-                                $(value).addClass(`oculto${filtrado}`);
-                            }
-                        });
-                        break;
-                    case `importe`:
-
-                        let mayorQueNumero = parseFloat(valorBuscado.slice(1, indice));
-                        let menorQueNumero = parseFloat(valorBuscado.slice(indice + 1));
-
-                        $.each(registros, (indice, value) => {
-                            let valorFilaNumero = parseFloat(stringANumero($(`td.${filtrado}`, value).text()));;
-
-                            if (valorFilaNumero > mayorQueNumero && valorFilaNumero < menorQueNumero) {
-                                $(value).removeClass(`oculto${filtrado}`);
-                            } else {
-                                $(value).addClass(`oculto${filtrado}`);
-                            }
-                        });
-                        break;
-                }
-            } else {
-
-                switch (tipoFiltrado) {
-                    case `fecha`:
-
-                        let valorBuscadoMenorFecha = valorBuscado.slice(1).split(`/`);
-                        let valorBuscadoMenorFechaDef = new Date(valorBuscadoMenorFecha[1] + `/` + valorBuscadoMenorFecha[0] + `/` + valorBuscadoMenorFecha[2])
-
-                        $.each(registros, (indice, value) => {
-                            let valorFilaFecha = $(value).children(`td.${filtrado}`).text().split(`/`);
-                            let valorfilaFechaDef = new Date(valorFilaFecha[1] + `/` + valorFilaFecha[0] + `/` + valorFilaFecha[2])
-
-                            if (valorfilaFechaDef > valorBuscadoMenorFechaDef) {
-                                $(value).removeClass(`oculto${filtrado}`);
-                            } else {
-                                $(value).addClass(`oculto${filtrado}`);
-                            }
-                        });
-                        break;
-                    case `importe`:
-                        let valorBuscadoMenorNumero = parseFloat(valorBuscado.slice(1));
-
-                        $.each(registros, (indice, value) => {
-                            let valorFilaNumero = parseFloat(stringANumero($(`td.${filtrado}`, value).text()));
-
-                            if (valorFilaNumero > valorBuscadoMenorNumero) {
-                                $(value).removeClass(`oculto${filtrado}`);
-                            } else {
-                                $(value).addClass(`oculto${filtrado}`);
-                            }
-                        });
-
-                        break;
-                }
-            }
-        } else if (primerCaracter == "<") {
-
-            let tipoFiltrado = $(e.target).attr("type")
-
-            if (valorBuscado.includes(">")) {
-                let indice = valorBuscado.indexOf(">");
-
-                switch (tipoFiltrado) {
-                    case `fecha`:
-                        let mayorQueFecha = Date.parse(valorBuscado.slice(1, indice));
-                        let menorQueFecha = Date.parse(valorBuscado.slice(indice + 1));
-
-                        $.each(registros, (indice, value) => {
-                            let valorFilaFecha = Date.parse(
-                                $(value).children(`td.${filtrado}`).text().toLowerCase()
-                            );
-
-                            if (
-                                valorFilaFecha < mayorQueFecha &&
-                                valorFilaFecha > menorQueFecha
-                            ) {
-                                $(value).removeClass(`oculto${filtrado}`);
-                            } else {
-                                $(value).addClass(`oculto${filtrado}`);
-                            }
-                        });
-                        break;
-                    case `importe`:
-
-                        let mayorQueNumero = parseFloat(valorBuscado.slice(1, indice));
-                        let menorQueNumero = parseFloat(valorBuscado.slice(indice + 1));
-
-                        $.each(registros, (indice, value) => {
-
-                            let valorFilaNumero = parseFloat(stringANumero($(`td.${filtrado}`, value).text()));
-
-                            if (valorFilaNumero < mayorQueNumero && valorFilaNumero > menorQueNumero) {
-                                $(value).removeClass(`oculto${filtrado}`);
-                            } else {
-                                $(value).addClass(`oculto${filtrado}`);
-                            }
-                        });
-                        break;
-
-                }
-            } else {
-                switch (tipoFiltrado) {
-                    case `fecha`:
-                        let valorBuscadoMenorFecha = Date.parse(valorBuscado.slice(1));
-
-                        $.each(registros, (indice, value) => {
-                            let valorFilaFecha = Date.parse(
-                                $(value).children(`td.${filtrado}`).text().toLowerCase()
-                            );
-
-                            if (valorFilaFecha < valorBuscadoMenorFecha) {
-                                $(value).removeClass(`oculto${filtrado}`);
-                            } else {
-                                $(value).addClass(`oculto${filtrado}`);
-                            }
-                        });
-                        break;
-                    case `importe`:
-
-                        let valorBuscadoMenorNumero = parseFloat(valorBuscado.slice(1));
-
-                        $.each(registros, (indice, value) => {
-                            let valorFilaNumero = parseFloat(stringANumero($(`td.${filtrado}`, value).text()));
-
-                            if (valorFilaNumero < valorBuscadoMenorNumero) {
-                                $(value).removeClass(`oculto${filtrado}`);
-                            } else {
-                                $(value).addClass(`oculto${filtrado}`);
-                            }
-                        });
-                        break;
-                }
-            }
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(fechaTexto)) {
+            [anio, mes, dia] = fechaTexto.split("-").map(Number);
         } else {
-
-            $.each(registros, (indice, value) => {
-
-                let valorFila = $(`td.${filtrado}`, value).text()?.toLowerCase();
-
-                if (valorFila.includes(valorBuscado)) {
-
-                    $(value).removeClass(`oculto${filtrado}`);
-                } else {
-                    $(value).addClass(`oculto${filtrado}`);
-                }
-            })
+            [dia, mes, anio] = fechaTexto.split(/[/-]/).map(Number);
+            if (anio < 100) anio += 2000;
         }
+
+        const fecha = new Date(anio, mes - 1, dia);
+        if (
+            Number.isNaN(fecha.getTime()) ||
+            fecha.getFullYear() !== anio ||
+            fecha.getMonth() !== (mes - 1) ||
+            fecha.getDate() !== dia
+        ) return null;
+
+        return fecha.getTime();
+    };
+    const esTipoNumerico = (tipo) => ["importe", "numero", "cantidad", "numerador", "numeradorCompuesto"].includes(tipo);
+    const comparable = (valor, tipo) => {
+        if (tipo === "fecha" || tipo === "fechaHora") return parseFechaReporte(valor);
+        if (esTipoNumerico(tipo)) {
+            const num = parseFloat(stringANumero(valor));
+            return Number.isNaN(num) ? null : num;
+        }
+        return null;
+    };
+    const coincideConTermino = (termino, fila, filtrado, tipoFiltrado) => {
+        const terminoRaw = (termino ?? "").toString();
+        if (/^\s+$/.test(terminoRaw)) {
+            const textoFilaRaw = ($(`td.${filtrado}`, fila).text() ?? "").toString();
+            return textoFilaRaw.trim() === "";
+        }
+
+        const buscado = normalizarTexto(terminoRaw);
+        const primerCaracter = buscado.slice(0, 1);
+        const textoFila = $(`td.${filtrado}`, fila).text() || "";
+        const textoFilaNormalizado = normalizarTexto(textoFila);
+
+        if (buscado === "vacio") return textoFilaNormalizado === "";
+        if (buscado === "!vacio") return textoFilaNormalizado !== "";
+
+        if (primerCaracter === ">" || primerCaracter === "<") {
+            const separador = primerCaracter === ">" ? "<" : ">";
+            const valorFilaComp = comparable(textoFila, tipoFiltrado);
+            if (valorFilaComp == null) return false;
+
+            if (buscado.includes(separador)) {
+                const indiceSep = buscado.indexOf(separador);
+                const valA = comparable(buscado.slice(1, indiceSep), tipoFiltrado);
+                const valB = comparable(buscado.slice(indiceSep + 1), tipoFiltrado);
+                if (valA == null || valB == null) return false;
+
+                if (primerCaracter === ">") return valorFilaComp > valA && valorFilaComp < valB;
+                return valorFilaComp < valA && valorFilaComp > valB;
+            }
+
+            const valUnico = comparable(buscado.slice(1), tipoFiltrado);
+            if (valUnico == null) return false;
+
+            if (primerCaracter === ">") return valorFilaComp > valUnico;
+            return valorFilaComp < valUnico;
+        }
+
+        return textoFilaNormalizado.includes(buscado);
+    };
+    const crearCampoFiltro = (inputBase) => {
+        const input = $(inputBase).clone(false);
+        const campo = $(`<div class="filtroCampo"></div>`);
+        const botonEliminar = $(`<span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span>`);
+        campo.append(input).append(botonEliminar);
+        return campo;
+    };
+    const inicializarFiltrosDinamicos = () => {
+        $(`#t${numeroForm} tr.filtros td.filtro`).each((_, td) => {
+            const tdFiltro = $(td);
+            let columna = tdFiltro.children(".busquedasColumna");
+            if (!columna.length) {
+                const inputs = tdFiltro.children("input.filtro");
+                if (!inputs.length) return;
+                columna = $(`<div class="busquedasColumna"></div>`);
+                inputs.each((__, input) => {
+                    columna.append(crearCampoFiltro(input));
+                });
+                inputs.remove();
+                tdFiltro.prepend(columna);
+            }
+
+            const cantidadCampos = columna.children(".filtroCampo").length;
+            if (cantidadCampos < 2) {
+                const inputBase = columna.find("input.filtro").first();
+                for (let i = cantidadCampos; i < 2; i++) {
+                    columna.append(crearCampoFiltro(inputBase));
+                }
+            }
+        });
+    };
+    const filtros = (e) => {
+        const inputActual = $(e.target);
+        const tdFiltro = inputActual.closest("td.filtro");
+        const tabla = inputActual.closest("table");
+        const registros = $(`tr:not(.filaTotal):not(.titulosFila):not(.filtros)`, tabla);
+        const filtrado = tdFiltro.attr("atributo") || inputActual.attr("atributo");
+        const tipoFiltrado = inputActual.attr("type");
+        const terminos = $(`input.filtro`, tdFiltro)
+            .map((_, input) => ($(input).val() ?? "").toString())
+            .get()
+            .filter((v) => v !== "");
+
+        if (terminos.length === 0) {
+            $.each(registros, (_, fila) => {
+                $(fila).removeClass(`oculto${filtrado}`);
+            });
+            return;
+        }
+
+        $.each(registros, (_, fila) => {
+            const coincide = terminos.some((termino) => coincideConTermino(termino, fila, filtrado, tipoFiltrado));
+            if (coincide) $(fila).removeClass(`oculto${filtrado}`);
+            else $(fila).addClass(`oculto${filtrado}`);
+        });
     }
+    const autoAgregarCampoFiltro = (e) => {
+        const inputActual = $(e.currentTarget);
+        const columna = inputActual.closest(".busquedasColumna");
+        if (!columna.length) return;
+
+        const ultimoInput = columna.find(".filtroCampo:last input.filtro");
+        const valorUltimo = (ultimoInput.val() ?? "").toString();
+        if (valorUltimo === "") return;
+
+        const inputBase = columna.find("input.filtro").first();
+        if (!inputBase.length) return;
+
+        const nuevoCampo = crearCampoFiltro(inputBase);
+        $("input.filtro", nuevoCampo).val("");
+        columna.append(nuevoCampo);
+    }
+
+    inicializarFiltrosDinamicos();
+    const limpiarMarcaCeldaReporte = () => {
+        $(`#t${numeroForm} table td.seleccionada`).removeClass("seleccionada");
+        const seleccion = window.getSelection?.();
+        if (seleccion && seleccion.rangeCount > 0) {
+            seleccion.removeAllRanges();
+        }
+    };
+
+    $(`#t${numeroForm}`).off("mousemove.noHoverCeldaRep mousedown.noHoverCeldaRep click.noHoverCeldaRep", "table td");
+    $(`#t${numeroForm}`).on("mousemove.noHoverCeldaRep mousedown.noHoverCeldaRep click.noHoverCeldaRep", "table td", limpiarMarcaCeldaReporte);
 
     $(`#t${numeroForm}`).on("click", `.flechasOrden span.arriba:not(.active)`, ordenarAscendente)
     $(`#t${numeroForm}`).on("click", `.flechasOrden span.abajo:not(.active)`, ordenarDescendente)
     $(`#t${numeroForm}`).on("click", `.flechasOrden span.active`, quitarActive)
-    $(`#t${numeroForm}`).on("click", `.filtro span`, filaFiltroOculto)
-    $(`#t${numeroForm}`).on("input", `tr.filtros input`, filtros)
+    $(`#t${numeroForm}`).off("click.filtroRep", `th .iconos .filtro span.filtro`)
+    $(`#t${numeroForm}`).on("click.filtroRep", `th .iconos .filtro span.filtro`, filaFiltroOculto)
+    $(`#t${numeroForm}`).on("input", `tr.filtros input`, (e) => {
+        autoAgregarCampoFiltro(e);
+        filtros(e);
+    })
+    $(`#t${numeroForm}`).off("dblclick.filtroRep", `tr.filtros td.filtro`)
+    $(`#t${numeroForm}`).off("click.filtroRep", `.deleteFiltroCampo`)
+    $(`#t${numeroForm}`).on("click.filtroRep", `.deleteFiltroCampo`, (e) => {
+        e.stopPropagation();
+
+        const campo = $(e.currentTarget).closest(".filtroCampo");
+        const tdFiltro = campo.closest("td.filtro");
+        const columna = campo.closest(".busquedasColumna");
+        const cantidadCampos = columna.children(".filtroCampo").length;
+
+        if (cantidadCampos <= 2) {
+            $("input.filtro", campo).val("").trigger("input");
+            return;
+        }
+
+        campo.remove();
+        $("input.filtro", tdFiltro).first().trigger("input");
+    });
 
     $(`#t${numeroForm} th.${objeto?.ordenDefault?.[0]?.nombre} .flechasOrden span.${objeto?.ordenDefault?.[1]}`).trigger("click")
     $(`#t${numeroForm}`).data("orden-ready", true);
     let alto = $(`#t${numeroForm} tr.titulosFila`).height()
     $(`#t${numeroForm} tr.filtros`).css({ "top": `${alto}px` })
+    inicializarResizeTablaReportes(numeroForm, objeto)
 
 
 }
@@ -769,23 +1537,32 @@ function asgregarStickyDiv(objeto, numeroForm, div) {
 function valorParametrica(objeto, numeroForm, data, atributo, datoBuscado, multiplicador, nuevoAtributo) {
     $.each(data, (indice, value) => {
         let unidadMedida = value.unidadesMedida;
-
+        console.log(data)
+        console.log(datoBuscado)
         let atribut = consultaPestanas[atributo][value[atributo]];
+        console.log(atribut)
         let unidades = atribut?.["unidadesMedida"] || [];
         let precios = atribut?.[datoBuscado] || [];
+        let monedas = atribut?.["monedaCostos"] || [];
+
         let index = unidades.indexOf(unidadMedida);
         let buscado = index >= 0 ? precios[index] : precios[0] || 0;
+        let moneda = index >= 0 ? monedas[index] : monedas[0] || "";
         if (multiplicador == "totalHorizontal") {
-            value[nuevoAtributo] = value?.[multiplicador] * buscado;
+            value["monedaCostos"] = moneda;
+            value[nuevoAtributo] = (value?.[multiplicador] || 0) * buscado;
+
         } else {
             $.each(value.periodos, (ind, val) => {
+                val["monedaCostos"] = moneda;
                 let cantidad = val?.[multiplicador]
                 val[nuevoAtributo] = cantidad * buscado;
+
             })
         }
 
     });
-
+    console.log(data)
     return data;
 }
 function totalVerticalManual(objeto, numeroForm, tabla) {
@@ -829,8 +1606,8 @@ function totalVerticalManual(objeto, numeroForm, tabla) {
         const monthSixMonthsAg = ('0' + (sixMonthsAgo.getMonth() + 1)).slice(-2);
 
         fechas += `<div class="primerDiv mesesPicker">
-    <div class="fechaHasta"><div class="tituloPick"><h3>Hasta:</h3></div><input type="month" class="MesReporteHasta" name="monthPickerDesde" value="${year}-${month}"></div>
-    <div class="fechaDesde"><div class="tituloPick"><h3>Desde:</h3></div><input type="month" class="MesReporteDesde" name="monthPickerHasta" value="${yearSixMonthsAg}-${monthSixMonthsAg}"></div>
+    <div class="fechaHasta"><div class="tituloPick"><h3>Hasta:</h3></div><input type="month" class="MesReporteHasta" name="monthPickerDesde" value="${year}-${month}" ${autoCompOff} ></div>
+    <div class="fechaDesde"><div class="tituloPick"><h3>Desde:</h3></div><input type="month" class="MesReporteDesde" name="monthPickerHasta" value="${yearSixMonthsAg}-${monthSixMonthsAg}" ${autoCompOff} ></div>
     </div>`;
 
     } else if (fecha == "fecha") {
@@ -838,8 +1615,8 @@ function totalVerticalManual(objeto, numeroForm, tabla) {
         let fechaDesdeEntidad = objeto.fechaRegistros || fechaDesde
 
         fechas += `<div class="fechaTablaAbm">
-      <div><p>Desde:</p><input name="fechaDesde" type="date" class="fechaTextoDeAbm" value=${fechaDesdeEntidad}></div>
-      <div><p>Hasta:</p><input name="fechaHasta" type="date" class="fechaTextoHastaAbm" value=${fechaHasta}></div>
+      <div><p>Desde:</p><input name="fechaDesde" type="date" class="fechaTextoDeAbm" value=${fechaDesdeEntidad} ${autoCompOff} ></div>
+      <div><p>Hasta:</p><input name="fechaHasta" type="date" class="fechaTextoHastaAbm" value=${fechaHasta} ${autoCompOff} ></div>
       </div>`
 
     } else if (fecha == "saldos") { // para probar si anda el saldo, volar luego
@@ -847,8 +1624,8 @@ function totalVerticalManual(objeto, numeroForm, tabla) {
         let fechaDesdeEntidad = objeto.fechaRegistros || fechaDesde
 
         fechas += `<div class="fechaTablaAbm">
-      <div><p>Desde:</p><input name="fechaDesde" type="date" class="fechaTextoDeAbm" value=${fechaDesdeEntidad}></div>
-      <div><p>Hasta:</p><input name="fechaHasta" type="date" class="fechaTextoHastaAbm" value=${fechaHasta}></div>
+      <div><p>Desde:</p><input name="fechaDesde" type="date" class="fechaTextoDeAbm" value=${fechaDesdeEntidad} ${autoCompOff} ></div>
+      <div><p>Hasta:</p><input name="fechaHasta" type="date" class="fechaTextoHastaAbm" value=${fechaHasta} ${autoCompOff} ></div>
       </div>`
 
         let saldoInicial = objeto.saldoInicial ?? 0

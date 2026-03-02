@@ -3,6 +3,18 @@ const funcionesInicioPage = () => {//Ojo si borro esta función cada vez que cie
 }
 funcionesInicioPage()
 tipoDeCambioDefault = ""//ESto es utiliza para que en el file MonedasTotales.js en la funcion totalesBaseYMoneda, donde se d
-let modulosLocales = modulosTotales
+
 
 let tareasProgramadasLocal = {}
+
+let modulosLocales = {
+
+    configInvent: { ...modulosTotales.configInvent },
+    empresa: { ...modulosTotales.empresa },
+    numeradores: { ...modulosTotales.numeradores },
+    testing: { ...modulosTotales.testing },
+    tareasProgramadas: { ...modulosTotales.tareasProgramadas },
+    emails: { ...modulosTotales.emails },
+    acumuladores: { ...modulosTotales.acumuladores }
+}
+console.log(modulosLocales)

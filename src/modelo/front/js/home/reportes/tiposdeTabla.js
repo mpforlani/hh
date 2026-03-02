@@ -13,6 +13,55 @@ const mesesTitulo = {
     12: "Dic",
 
 }
+
+function normalizarMonedaReporte(moneda) {
+
+    if (!moneda) return "";
+
+    return moneda
+        .toString()
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
+function aplicarMonedaSegunFilaReporte(tablaCreada) {
+
+    if (!tablaCreada?.length) return;
+
+    const filas = $("tr.fila, tr.itemsTabla", tablaCreada);
+
+    $.each(filas, (_, fila) => {
+
+        const filaActual = $(fila);
+        const celdaMoneda = $("td[atributo='monedaComp'], td[atributo='moneda'], td.monedaComp, td.moneda", filaActual).first();
+        const monedaNormalizada = normalizarMonedaReporte(celdaMoneda.text());
+
+        if (!monedaNormalizada) return;
+
+        $("td[type='importe'], td[type='numero'], td.saldo", filaActual).attr("moneda", monedaNormalizada);
+
+        $("td.mesItems div[type='importe'], td.mesItems div[type='numero'], td.anteriores div[type='importe'], td.totalHorizontal div[type='importe'], td.totalHorizontal div[type='numero'], td.total div[type='importe'], td.total div[type='numero']", filaActual)
+            .attr("moneda", monedaNormalizada);
+    });
+}
+
+function obtenerMonedaTotalTablaReporte(objeto, numeroForm, nombreTab) {
+
+    const filtroMoneda =
+        objeto?.filtros?.cabecera?.monedaComp ||
+        objeto?.filtros?.cabecera?.moneda;
+
+    if (Array.isArray(filtroMoneda)) {
+        const monedaFiltrada = filtroMoneda[2] || filtroMoneda[1] || "";
+        const monedaNormalizada = normalizarMonedaReporte(monedaFiltrada);
+        if (monedaNormalizada) return monedaNormalizada;
+    }
+
+    const primerRegistro = consultaGet?.[numeroForm]?.[nombreTab]?.[0] || {};
+    return normalizarMonedaReporte(primerRegistro?.monedaComp || primerRegistro?.moneda || "");
+}
 //Tipo de reportes
 function agrupadorSubAgrupadorMeses(objeto, numeroForm, nombreTab, objetoRep) {
 
@@ -112,7 +161,7 @@ function agrupadorSubAgrupadorMeses(objeto, numeroForm, nombreTab, objetoRep) {
 
         tabla += `<td class="td filtro ${atributo.nombre || atributo} ${atributo.clase || ""}" atributo="${atributo.nombre || atributo}" colum="${colum}" ${widthObject[atributo.width] || ""}>
                  
-                 <input class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}"  colum="${colum}"/>
+                 <input class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}"  colum="${colum}" ${autoCompOff} />
                   <span class="material-symbols-outlined oculto ojito">visibility</span>
                    <span class="material-symbols-outlined tachado ojito">visibility_off</span>
                  </td>`
@@ -171,6 +220,7 @@ function agrupadorSubAgrupadorMeses(objeto, numeroForm, nombreTab, objetoRep) {
     tabla += `</table>`;
 
     $(tabla).appendTo(`#t${numeroForm}`);
+    aplicarMonedaSegunFilaReporte($(`#t${numeroForm} table[tablaRef="${nombreTab}"]`));
     abrirRegistroIndividual(objeto, numeroForm);
 
     setTimeout(() => {
@@ -219,7 +269,7 @@ function infoEntidadMasEditTable(objeto, numeroForm, nombreTab, objetoRep) {
 
         tabla += `<td class="td filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" style="order:${indice}" colum="${colum}" ${widthObject[atributo.width] || ""}>
            
-           <input  class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}"  colum="${colum}"/>
+           <input  class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}"  colum="${colum}" ${autoCompOff} />
            <span class="material-symbols-outlined oculto ojito">visibility</span>
            <span class="material-symbols-outlined tachado ojito">visibility_off</span>
            </td>`
@@ -233,7 +283,7 @@ function infoEntidadMasEditTable(objeto, numeroForm, nombreTab, objetoRep) {
 
         tabla += `<td class="td filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" style="order:${orden || indice}" colum="${colum}" style="order:${orden || indice}" ${widthObject[atributo.width] || ""}>
            
-           <input  class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}"  colum="${colum}"/>
+           <input  class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}"  colum="${colum}" ${autoCompOff} />
            <span class="material-symbols-outlined oculto ojito">visibility</span>
             <span class="material-symbols-outlined tachado ojito">visibility_off</span>
            
@@ -251,7 +301,7 @@ function infoEntidadMasEditTable(objeto, numeroForm, nombreTab, objetoRep) {
 
         //Cración de ids
         tabla += `<td class="_id oculto" atributo="_id"  style="order:"-1" colum="-1">
-         <input class="rep _idRefencia" name="_id" colum="-1" value="${value._id}" /></td>`
+         <input class="rep _idRefencia" name="_id" colum="-1" value="${value._id}"  ${autoCompOff} /></td>`
 
         /////
         $.each(objeto.atributos, (ind, val) => {
@@ -279,6 +329,7 @@ function infoEntidadMasEditTable(objeto, numeroForm, nombreTab, objetoRep) {
     tabla += `<div class="barraCalculada"><div class="datosCalculados"><p>Registros: ${consultaGet[numeroForm][nombreTab].length || 0}</p></div></div>`;
 
     $(tabla).appendTo(`#t${numeroForm}`);
+    aplicarMonedaSegunFilaReporte($(`#t${numeroForm} table[tablaRef="${nombreTab}"]`));
     $(`#t${numeroForm} div._id`).addClass("oculto")
 
     setTimeout(() => {
@@ -296,6 +347,106 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
     let anteriores = []
     let complemento = ""
     let colum = 0
+
+    const asegurarEstiloRowspanCompat = () => {
+        $("#rowspanCompatStyle").remove();
+
+        const style = `
+        <style id="rowspanCompatStyle">
+            .tablaReporte table[rowspanCompat="true"] tr {
+                display: table-row !important;
+            }
+            .tablaReporte table[rowspanCompat="true"] tr th,
+            .tablaReporte table[rowspanCompat="true"] tr td {
+                display: table-cell !important;
+            }
+            .tablaReporte table[rowspanCompat="true"] tr td:hover {
+                background-color: transparent !important;
+                font-weight: inherit !important;
+                cursor: default !important;
+            }
+            .tablaReporte table[rowspanCompat="true"] tr td.seleccionada {
+                background-color: transparent !important;
+            }
+            .tablaReporte table[rowspanCompat="true"] tr td.hoverGrupoCeldaCompat {
+                background-color: rgb(237, 239, 247) !important;
+            }
+            .tablaReporte table[rowspanCompat="true"] tr td,
+            .tablaReporte table[rowspanCompat="true"] tr td * {
+                user-select: none !important;
+                -webkit-user-select: none !important;
+            }
+            .tablaReporte table[rowspanCompat="true"] tr.filtros {
+                display: none !important;
+            }
+            .tablaReporte table[rowspanCompat="true"] tr.filtros.active {
+                display: table-row !important;
+            }
+        </style>`;
+
+        $("head").append(style);
+    };
+    const activarHoverGrupoRowspanCompat = (tablaCreada, columnasUnir) => {
+        const limpiarHoverGrupo = () => {
+            $("td.hoverGrupoCeldaCompat", tablaCreada).removeClass("hoverGrupoCeldaCompat");
+        };
+
+        tablaCreada.off(".rowspanCompatGroupHover");
+        tablaCreada.on("mouseenter.rowspanCompatGroupHover", "tr.fila", function () {
+            limpiarHoverGrupo();
+
+            const fila = $(this);
+            for (const columna of columnasUnir) {
+                const grupo = fila.attr(`data-rowspan-group-${columna}`);
+                if (!grupo) continue;
+
+                const celdaGrupo = $(`td.${columna}[data-rowspan-group-${columna}="${grupo}"]`, tablaCreada).first();
+                if (celdaGrupo.length) {
+                    celdaGrupo.addClass("hoverGrupoCeldaCompat");
+                }
+            }
+        });
+        tablaCreada.on("mouseleave.rowspanCompatGroupHover", function () {
+            limpiarHoverGrupo();
+        });
+    };
+    const aplicarRowspanPorColumna = (tablaCreada, claseColumna) => {
+        let celdaBase = null;
+        let valorBase = "";
+        let cantidadFilas = 1;
+        let grupoActual = 0;
+        const grupoAttr = `data-rowspan-group-${claseColumna}`;
+
+        const cerrarGrupo = () => {
+            if (celdaBase && cantidadFilas > 1) {
+                celdaBase.attr("rowspan", cantidadFilas);
+            }
+        };
+
+        $("tr.fila", tablaCreada).each((_, fila) => {
+            const celdaActual = $(`td.${claseColumna}`, fila).first();
+            if (!celdaActual.length) return;
+
+            const valorActual = (celdaActual.text() || "").trim();
+
+            if (!celdaBase || valorActual !== valorBase) {
+                cerrarGrupo();
+                grupoActual++;
+                celdaBase = celdaActual;
+                valorBase = valorActual;
+                cantidadFilas = 1;
+                $(fila).attr(grupoAttr, grupoActual);
+                celdaBase.attr(grupoAttr, grupoActual);
+                return;
+            }
+
+            $(fila).attr(grupoAttr, grupoActual);
+            celdaActual.remove();
+            cantidadFilas++;
+        });
+
+        cerrarGrupo();
+    };
 
     if (objeto?.totalHorizontal) {
 
@@ -358,7 +509,7 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
         let atributo = objeto.atributos[indice]
 
         tabla += `<td class="filtro ${atributo.nombre || atributo} ${atributo.clase || ""}" atributo="${atributo.nombre || atributo}"  ${widthObject[atributo.width] || ""}>
-                <input name="${atributo.nombre || atributo}" class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}" />
+                <input name="${atributo.nombre || atributo}" class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}"  ${autoCompOff} />
                 <span class="material-symbols-outlined oculto ojito">visibility</span>
                 <span class="material-symbols-outlined tachado ojito">visibility_off</span>
                 </td>`
@@ -368,7 +519,7 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
     tabla += "</div>";
     let mesTitulosFiltro = mesActual
     let anoTitulosFiltro = anoActual
-
+    let mesAnoTitulosFiltro = mesAno(anoTitulosFiltro, mesTitulosFiltro)
     for (let x = 0; x < mesesTotales; x++) {
 
         mesTitulosFiltro == 0 ? (mesTitulosFiltro = 12, anoTitulosFiltro--) : ""
@@ -378,7 +529,7 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
 
             let atributo = objeto.atributosEnMeses[ind]
             tabla += `<td class=" filtro ${mesesTitulo[mesTitulosFiltro]} ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}">
-                      <input  class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}"/>
+                      <input  class="filtro ${atributo.nombre || atributo}" atributo="${atributo.nombre || atributo}" type="${atributo.type}" ${autoCompOff} />
                       <span class="material-symbols-outlined oculto ojito">visibility</span>
                       <span class="material-symbols-outlined tachado ojito">visibility_off</span>
                       </td>`
@@ -392,19 +543,18 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
     for (const total of anteriores) {
 
         tabla += `<td class=" filtro anteriores" atributo="anteriores">
-                      <input  class="filtro anteriores" atributo="anteriores" type="cantidad"/>
+                      <input  class="filtro anteriores" atributo="anteriores" type="cantidad" ${autoCompOff} />
                      </td>`
     }
 
     for (const total of Object.values(totalesHorizontal)) {
 
         tabla += `<td class=" filtro total" atributo="total">
-                      <input  class="filtro total" atributo="total" type="importe"/>
+                      <input  class="filtro total" atributo="total" type="importe" ${autoCompOff} />
                      </td>`
     }
 
     tabla += `</tr>` //Cierre Tr filtros
-    const unirAtributos = {}
     $.each(consultaGet[numeroForm][nombreTab], (indice, value) => {
 
         tabla += `<tr class="fila" fila="${indice}" >`
@@ -412,10 +562,6 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
         $.each(objeto.atributos, (i, v) => {
 
             let atributoPestana = consultaPestanas?.[v.origen || v.nombre]?.[value[v.origen || v.nombre]]
-
-            const clave = (atributoPestana?.name || value[v.nombre]);
-            if (!unirAtributos[v.nombre]) unirAtributos[v.nombre] = {};
-            unirAtributos[v.nombre][clave] = { fila: indice, cantidad: (unirAtributos?.[v.nombre]?.[clave]?.cantidad || 0) + 1 }
 
             tabla += `<td class="td ${v.nombre} ${v.clase} padding-left-uno" atributo="${v.nombre}" agrupa="${v.agrupa || ""}" type="${v.type}" ${widthObject[v.width] || ""}>${atributoPestana?.name || value[v?.nombre]} </td>`
         })
@@ -427,7 +573,7 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
         for (let x = 0; x < mesesTotales; x++) {
 
             mesActualAtributo == 0 ? (mesActualAtributo = 12, anoActualAtributo--) : ""
-            mesAnoActualAtributos = `${anoActualAtributo}${mesActualAtributo}`
+            mesAnoActualAtributos = mesAno(anoActualAtributo, mesActualAtributo)
 
             tabla += `<td class="td mesItems compuesto ${mesesTitulo[mesActualAtributo]} textoCentrado" mesAno="${mesAnoActualAtributos}" ${complemento || ""} colum="${colum}">`
 
@@ -475,6 +621,9 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
 
     if (objeto?.totales?.vertical != undefined || objeto.totalVertical) {
 
+        const monedaTotales = obtenerMonedaTotalTablaReporte(objeto, numeroForm, nombreTab);
+        const monedaTotalesAttr = monedaTotales ? ` moneda="${monedaTotales}"` : "";
+
         let totalVertical = Object.values(consultaGet[numeroForm][nombreTab][0].periodos)
 
         tabla += `<tr class="filaTotal">`
@@ -493,11 +642,11 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
         for (let x = 0; x < mesesTotales; x++) {
 
             mesTitulos == 0 ? (mesTitulos = 12, anoTitulos--) : ""
-            mesAnoTitulos = `${anoTitulos}${mesTitulos}`
+            mesAnoTitulos = mesAno(anoTitulos, mesTitulos)
 
             let total = totalVertical.find(e => e.periodo == mesAnoTitulos) || {}
 
-            tabla += `<td class="td total mes ${mesesTitulo[mesTitulos]} textoCentrado"  mesAno="${mesAnoTitulos}">${numeroAString(total?.totalVertical || 0)}</td>`
+            tabla += `<td class="td total mes ${mesesTitulo[mesTitulos]} textoCentrado"  mesAno="${mesAnoTitulos}"${monedaTotalesAttr}>${numeroAString(total?.totalVertical || 0)}</td>`
             mesTitulos--
         }
 
@@ -512,13 +661,13 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
                 if (minNumeric < mesAnoTitulos) {
                     valor = numeroAString(totales[minNumeric])
                 }
-                tabla += `<td class="td total anteriores textoCentrado" colum="anteriores">${valor}</td>`
+                tabla += `<td class="td total anteriores textoCentrado" colum="anteriores"${monedaTotalesAttr}>${valor}</td>`
 
             })
         }
         $.each(totalesHorizontal, (indice, value) => {
 
-            tabla += `<td class="td total totalorizontal textoCentrado">${numeroAString(totalesHorizontal.total)}</td>`
+            tabla += `<td class="td total totalorizontal textoCentrado"${monedaTotalesAttr}>${numeroAString(totalesHorizontal.total)}</td>`
         })
 
         tabla += `</tr>`
@@ -529,27 +678,17 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
     tabla += `<div class="barraCalculada"><div class="datosCalculados"><p>Registros: ${consultaGet[numeroForm][nombreTab].length || 0}</p></div></div>`;
 
     $(tabla).appendTo(`#t${numeroForm}`);
-    $.each(objeto.unir, (indice, value) => {
-        let objetofilt = { ...unirAtributos[value] }
+    const tablaCreada = $(`#t${numeroForm} table[tablaRef="${nombreTab}"]`);
+    aplicarMonedaSegunFilaReporte(tablaCreada);
 
-        let objetoFiltrado = Object.fromEntries(
-            Object.entries(objetofilt)
-                .filter(([key, value]) => value.cantidad > 1)
-        );
+    if (objeto?.unir && Object.keys(objeto.unir).length > 0) {
+        asegurarEstiloRowspanCompat();
+        tablaCreada.attr("rowspanCompat", "true");
+        const columnasUnir = Object.values(objeto.unir);
+        $.each(columnasUnir, (_, claseColumna) => aplicarRowspanPorColumna(tablaCreada, claseColumna));
+        activarHoverGrupoRowspanCompat(tablaCreada, columnasUnir);
+    }
 
-        $.each(objetoFiltrado, (ind, val) => {
-            let rowSpan = 1
-            for (let x = 1; x < val.cantidad; x++) {
-
-                $(`#t${numeroForm} tr[fila="${val.fila}"] td.${value}`).remove()
-
-                val.fila = val.fila - x
-                rowSpan++
-            }
-
-            $(`#t${numeroForm} tr[fila="${val.fila}"] td.${value}`).attr("rowspan", rowSpan)
-        })
-    })
     abrirRegistroIndividual(objeto, numeroForm)
 
     setTimeout(() => {
@@ -592,7 +731,7 @@ function tipoExtracto(objeto, numeroForm, nombreTab, objetoRep) {
 
     $.each(objetoRep.tablas[nombreTab].atributos, (i, atr) => {
 
-        tabla += `<td class="td filtro ${atr.nombre}" atributo="${atr.nombre}" colum="${colum}" style="order:${i}" ${widthObject[atr.width] || ""}><input class="filtro ${atr.nombre}" atributo="${atr.nombre}"type="${atr.type}" colum="${colum}" />
+        tabla += `<td class="td filtro ${atr.nombre}" atributo="${atr.nombre}" colum="${colum}" style="order:${i}" ${widthObject[atr.width] || ""}><input class="filtro ${atr.nombre}" atributo="${atr.nombre}"type="${atr.type}" colum="${colum}"  ${autoCompOff} />
         <span class="material-symbols-outlined oculto ojito">visibility</span>
         <span class="material-symbols-outlined tachado ojito">visibility_off</span>
         </td>`
@@ -600,7 +739,7 @@ function tipoExtracto(objeto, numeroForm, nombreTab, objetoRep) {
         colum++
     })
     if (tieneImporte) {
-        tabla += `<td class="td filtro saldo" atributo="saldo" colum="${colum}" style="order:${colum}"${widthObject["medio"] || ""}><input class="filtro saldo"atributo="saldo"type="importe" colum="${colum}" /></td>`
+        tabla += `<td class="td filtro saldo" atributo="saldo" colum="${colum}" style="order:${colum}"${widthObject["medio"] || ""}><input class="filtro saldo"atributo="saldo"type="importe" colum="${colum}"  ${autoCompOff} /></td>`
     }
     tabla += `</tr>`
 
@@ -625,7 +764,7 @@ function tipoExtracto(objeto, numeroForm, nombreTab, objetoRep) {
         tabla += `<tr class="fila">`
 
 
-        tabla += `<td class="_id oculto" atributo="_id" colum="-1" style="order:-1"><input class="rep _idRefencia" name="_id" value="${fila._id || ""}" /></td>`
+        tabla += `<td class="_id oculto" atributo="_id" colum="-1" style="order:-1"><input class="rep _idRefencia" name="_id" value="${fila._id || ""}"  ${autoCompOff} /></td>`
 
 
         $.each(objetoRep.tablas[nombreTab].atributos, (ind, atr) => {
@@ -663,6 +802,7 @@ function tipoExtracto(objeto, numeroForm, nombreTab, objetoRep) {
     tabla += `</table>`
     tabla += `<div class="barraCalculada"><div class="datosCalculados"><p>Registros: ${consultaGet[numeroForm][nombreTab].length || 0}</p></div></div>`;
     $(tabla).appendTo(`#t${numeroForm}`)
+    aplicarMonedaSegunFilaReporte($(`#t${numeroForm} table[tablaRef="${nombreTab}"]`));
     abrirRegistroIndividual(objeto, numeroForm)
 
     setTimeout(() => {

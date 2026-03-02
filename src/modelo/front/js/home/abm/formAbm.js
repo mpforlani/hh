@@ -89,13 +89,13 @@ function crearTabla(numeroForm, objeto, consulta) {//Dicionario
 
             $.each(filtro, function (indice, value) {
                 tabla += `<div class="td filtro oculto ${value}" type=${widthTitlesD[indice].type} filtro="${value}" numeroFila="${indice}" style="order:${indice}" ${widthObject[widthTitlesD[indice]?.width] || ""} ${ocultoOject[widthTitlesD[indice]?.oculto] || ""}>
-                          <div class="filtroClass"><input class="busqueda" ${autoCompOff} ><p class="closeFiltro">+</p></div></div>`;
+                          <div class="filtroClass"><div class="busquedasColumna"><div class="filtroCampo"><input class="busqueda" ${autoCompOff}><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div><div class="filtroCampo"><input class="busqueda" ${autoCompOff}><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div></div><p class="closeFiltro">+</p></div></div>`;
             });
 
             tabla += `<div class="td filtro oculto date" filtro="date" type="date" numeroFila="9998" style="order:9998" width="doce">
-                          <div class="filtroClass"><input class="busqueda date" ${autoCompOff}><p class="closeFiltro">+</p></div></div>`;
+                          <div class="filtroClass"><div class="busquedasColumna"><div class="filtroCampo"><input class="busqueda date" ${autoCompOff}><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div><div class="filtroCampo"><input class="busqueda date" ${autoCompOff}><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div></div><p class="closeFiltro">+</p></div></div>`;
             tabla += `<div class="td filtro oculto username" filtro="username" type="date" numeroFila="9998" style="order:9998" width="doce">
-                          <div class="filtroClass"><input class="busqueda username" ${autoCompOff}><p class="closeFiltro">+</p></div></div>`;
+                          <div class="filtroClass"><div class="busquedasColumna"><div class="filtroCampo"><input class="busqueda username" ${autoCompOff}><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div><div class="filtroCampo"><input class="busqueda username" ${autoCompOff}><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div></div><p class="closeFiltro">+</p></div></div>`;
 
         } else if (i > -1 && i < consulta.length) {
 
@@ -122,6 +122,7 @@ function crearTabla(numeroForm, objeto, consulta) {//Dicionario
     removeProgressBarHeightDiv(objeto, numeroForm)
     let alto = $(`#t${numeroForm} .tr.tituloTablas`).height()
     $(`#t${numeroForm} .tr.filtro`).css({ "top": `${alto}px` })
+    inicializarResizeTablaAbm(numeroForm, objeto)
 
     $.each(objeto.ocultroAtributosSeguridad, (indice, value) => {
 
@@ -314,18 +315,18 @@ function reCrearTabla(numeroForm, objeto) {//Dicionario
 
                         tabla += `<div class="th tituloTablas ${widthTitlesD[indice]?.nombre} ${filtro[indice]}" type=${widthTitlesD[indice].type} filtro="${filtro[indice]}" style="order:${indice}" ${widthObject[widthTitlesD[indice]?.width] || ""} ${ocultoOject[widthTitlesD[indice]?.oculto] || ""}><div class="th-contenido"><span class="tit">${[value]}</span><div class="iconos">${flechasOrden}${filtroIcon}</div></div></div>`;
                     });
-                    tabla += `<div class="th tituloTablas date" type:"date" filtro="date" style="order:9998" width="doce">Auditoria</div>`;
-                    tabla += `<div class="th tituloTablas username" type:"texto" filtro=username style="order:9999" width="doce" >Autor</div>`;
+                    tabla += `<div class="th tituloTablas date" type="date" filtro="date" style="order:9998" width="doce"><div class="th-contenido"><span class="tit">Auditoria</span><div class="iconos">${flechasOrden}${filtroIcon}</div></div></div>`;
+                    tabla += `<div class="th tituloTablas username" type="texto" filtro="username" style="order:9999" width="doce"><div class="th-contenido"><span class="tit">Autor</span><div class="iconos">${flechasOrden}${filtroIcon}</div></div></div>`;
                     tabla += `</div>`;
                     tabla += `<div class="tr filtro">`;
                     $.each(filtro, function (indice, value) {
                         tabla += `<div class="td filtro oculto ${value}" type=${widthTitlesD[indice].type} filtro="${value}" numeroFila="${indice}" ${widthObject[widthTitlesD[indice]?.width] || ""} ${ocultoOject[widthTitlesD[indice]?.oculto] || ""}>
-                                  <div class="filtroClass"><input class="busqueda"><p class="closeFiltro">+</p></div></div>`;
+                                  <div class="filtroClass"><div class="busquedasColumna"><div class="filtroCampo"><input class="busqueda" ${autoCompOff} ><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div><div class="filtroCampo"><input class="busqueda" ${autoCompOff} ><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div></div><p class="closeFiltro">+</p></div></div>`;
                     });
                     tabla += `<div class="td filtro oculto date" filtro="date" numeroFila="9998" sstyle="order:9998" width="doce">
-                          <div class="filtroClass"><input class="busqueda"><p class="closeFiltro">+</p></div></div>`;
+                          <div class="filtroClass"><div class="busquedasColumna"><div class="filtroCampo"><input class="busqueda" ${autoCompOff} ><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div><div class="filtroCampo"><input class="busqueda" ${autoCompOff} ><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div></div><p class="closeFiltro">+</p></div></div>`;
                     tabla += `<div class="td filtro oculto date" filtro="date" numeroFila="9998" sstyle="order:9998" width="doce">
-                          <div class="filtroClass"><input class="busqueda"><p class="closeFiltro">+</p></div></div>`;
+                          <div class="filtroClass"><div class="busquedasColumna"><div class="filtroCampo"><input class="busqueda" ${autoCompOff} ><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div><div class="filtroCampo"><input class="busqueda" ${autoCompOff} ><span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span></div></div><p class="closeFiltro">+</p></div></div>`;
 
                 } else if (i > -1 && i < consultaReCrear.length) {
 
@@ -359,6 +360,7 @@ function reCrearTabla(numeroForm, objeto) {//Dicionario
 
             let alto = $(`#t${numeroForm} .tr.tituloTablas`).height()
             $(`#t${numeroForm} .tr.filtro`).css({ "top": `${alto}px` })
+            inicializarResizeTablaAbm(numeroForm, objeto)
 
 
             $(`#t${numeroForm}`).css(`max-height`, heightTabla(numeroForm))
@@ -643,7 +645,7 @@ function filaAbmEditada(objeto, numeroForm) {
             case `checkbox`:
 
                 $(`#t${numeroForm} .tr.sel .edit.${value.nombre}`).attr("type", "checkbox").removeAttr("form").removeAttr("name").prop("checked", valorLogic);
-                let hidden = `<input type="hidden" class="edit ${value.nombre}" name="${value.nombre}" form="f${objeto.accion}${numeroForm}" value="${valorLogic || false}"  />`;
+                let hidden = `<input type="hidden" class="edit ${value.nombre}" name="${value.nombre}" form="f${objeto.accion}${numeroForm}" value="${valorLogic || false}"   ${autoCompOff} />`;
 
                 $(hidden).appendTo(`#t${numeroForm} .tr.sel div.celda.${value.nombre}`);
 
@@ -664,7 +666,7 @@ function filaAbmEditada(objeto, numeroForm) {
 
     $(`#t${numeroForm} .tr.sel div.celda._id`).empty();
 
-    inp = `<input class="edit auditoria date ${numeroForm}" name="date" form="f${accion}${numeroForm}" soloLec=true type="datetime-local"></input>`;
+    inp = `<input class="edit auditoria date ${numeroForm}" name="date" form="f${accion}${numeroForm}" soloLec=true type="datetime-local" ${autoCompOff} ></input>`;
 
     input = $(inp);
     input.appendTo(`#t${numeroForm} .tr.sel div.celda.date`);
@@ -672,14 +674,14 @@ function filaAbmEditada(objeto, numeroForm) {
     let fecha = dateNowAFechaddmmyyyy(Date.now(), `y-m-dThh`);
     $(`#t${numeroForm} input.edit.date`).val(fecha);
 
-    inp = `<input class="edit auditoria username ${numeroForm}" name="username" form="f${accion}${numeroForm}" soloLec=true></input>`;
+    inp = `<input class="edit auditoria username ${numeroForm}" name="username" form="f${accion}${numeroForm}" soloLec=true ${autoCompOff} ></input>`;
 
     input = $(inp);
 
     input.appendTo(`#t${numeroForm} .tr.sel div.celda.username`);
     $(`#t${numeroForm} input.edit.username`).val(usu);
 
-    inp = `<input class="edit _id ${numeroForm}" name="_id" form="f${accion}${numeroForm}" soloLec=true></input>`;
+    inp = `<input class="edit _id ${numeroForm}" name="_id" form="f${accion}${numeroForm}" soloLec=true ${autoCompOff} ></input>`;
     input = $(inp);
     input.appendTo(`#t${numeroForm} .tr.sel div.celda._id`);
     $(`#t${numeroForm} input.edit._id`).val(valorId);
@@ -1347,12 +1349,69 @@ function rellenoAbmFechaVenc(objeto, numeroForm, atributo, opciones, fechaV) {
 }
 function ordenarAbm(consulta, numeroForm) {
 
+    const parseFechaFlexible = (valor) => {
+        const texto = (valor ?? "").toString().trim();
+        if (!texto) return null;
+
+        const encontrado = texto.match(/\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/);
+        if (!encontrado) return null;
+
+        const fechaTexto = encontrado[0];
+        let dia, mes, anio;
+
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(fechaTexto)) {
+            [anio, mes, dia] = fechaTexto.split('-').map(Number);
+        } else {
+            [dia, mes, anio] = fechaTexto.split(/[/-]/).map(Number);
+            if (anio < 100) anio += 2000;
+        }
+
+        const fecha = new Date(anio, mes - 1, dia);
+        if (
+            Number.isNaN(fecha.getTime()) ||
+            fecha.getFullYear() !== anio ||
+            fecha.getMonth() !== (mes - 1) ||
+            fecha.getDate() !== dia
+        ) {
+            return null;
+        }
+
+        return fecha;
+    };
+
+    const normalizarComparable = (valor) => {
+        if (valor instanceof Date) return valor.getTime();
+        if (typeof valor === "number" && Number.isNaN(valor)) return null;
+        return valor ?? null;
+    };
+
+    const compararValores = (a, b, descendente = false) => {
+        const va = normalizarComparable(a);
+        const vb = normalizarComparable(b);
+        const dir = descendente ? -1 : 1;
+
+        if (va == null && vb == null) return 0;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+
+        if (va < vb) return -1 * dir;
+        if (va > vb) return 1 * dir;
+        return 0;
+    };
+
+    const valorOrdenado = (row, campo, tipo, tipoOrden) => {
+        const texto = ($(row).children(`div.${campo}`).text() ?? "").toString().trim();
+        const convertido = tipoOrden?.[tipo]?.(texto);
+        if (convertido !== undefined) return convertido;
+        return texto.toLowerCase();
+    };
+
     const tipoOrden = {
-        fecha: (valor) => { return new Date(valor?.split('-')?.reverse()?.join('-')) },
+        fecha: (valor) => { return parseFechaFlexible(valor) },
         importe: (valor) => { return Number(stringANumero(valor)) },
         numero: (valor) => { return Number(stringANumero(valor)) },
         numerador: (valor) => { return Number(stringANumero(valor)) },
-        date: (valor) => { return new Date(valor?.slice(0, 10).split('/')?.reverse()?.join('-')); },
+        date: (valor) => { return parseFechaFlexible(valor) },
     }
     $(`#t${numeroForm} span.arriba`).on("click", function (e) {
 
@@ -1363,15 +1422,9 @@ function ordenarAbm(consulta, numeroForm) {
 
 
         registros.sort((a, b) => {
-            let valor1 = tipoOrden?.[type]?.($(a).children(`div.${objetivoClickMenuContextual}`).html()) || $(a).children(`div.${objetivoClickMenuContextual}`).html().toLowerCase();
-            let valor2 = tipoOrden?.[type]?.($(b).children(`div.${objetivoClickMenuContextual}`).html()) || $(b).children(`div.${objetivoClickMenuContextual}`).html().toLowerCase();
-            if (valor1 < valor2) {
-                return -1;
-            }
-            if (valor1 > valor2) {
-                return 1;
-            }
-            return 0;
+            let valor1 = valorOrdenado(a, objetivoClickMenuContextual, type, tipoOrden);
+            let valor2 = valorOrdenado(b, objetivoClickMenuContextual, type, tipoOrden);
+            return compararValores(valor1, valor2, false);
 
         });
 
@@ -1392,16 +1445,9 @@ function ordenarAbm(consulta, numeroForm) {
 
 
         registros.sort((a, b) => {
-            let valor1 = tipoOrden?.[type]?.($(a).children(`div.${objetivoClickMenuContextual}`).html()) || $(a).children(`div.${objetivoClickMenuContextual}`).html().toLowerCase();
-            let valor2 = tipoOrden?.[type]?.($(b).children(`div.${objetivoClickMenuContextual}`).html()) || $(b).children(`div.${objetivoClickMenuContextual}`).html().toLowerCase();
-
-            if (valor1 < valor2) {
-                return 1;
-            }
-            if (valor1 > valor2) {
-                return -1;
-            }
-            return 0;
+            let valor1 = valorOrdenado(a, objetivoClickMenuContextual, type, tipoOrden);
+            let valor2 = valorOrdenado(b, objetivoClickMenuContextual, type, tipoOrden);
+            return compararValores(valor1, valor2, true);
         });
 
         $.each(registros, (indice, value) => {
@@ -1414,25 +1460,59 @@ function ordenarAbm(consulta, numeroForm) {
 
 };
 function filtrarAbm(objeto, numeroForm) {
+    const parseFechaFlexible = (valor) => {
+        const texto = (valor ?? "").toString().trim();
+        if (!texto) return null;
+
+        const encontrado = texto.match(/\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/);
+        if (!encontrado) return null;
+
+        const fechaTexto = encontrado[0];
+        let dia, mes, anio;
+
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(fechaTexto)) {
+            [anio, mes, dia] = fechaTexto.split('-').map(Number);
+        } else {
+            [dia, mes, anio] = fechaTexto.split(/[/-]/).map(Number);
+            if (anio < 100) anio += 2000;
+        }
+
+        const fecha = new Date(anio, mes - 1, dia);
+        if (
+            Number.isNaN(fecha.getTime()) ||
+            fecha.getFullYear() !== anio ||
+            fecha.getMonth() !== (mes - 1) ||
+            fecha.getDate() !== dia
+        ) {
+            return null;
+        }
+
+        return fecha;
+    };
+
+    const normalizarComparable = (valor) => {
+        if (valor instanceof Date) return valor.getTime();
+        if (typeof valor === "number" && Number.isNaN(valor)) return null;
+        return valor ?? null;
+    };
+
     const tipoFiltro = {
-        fecha: (valor) => { return new Date(valor?.split('-')?.reverse()?.join('-')) },
+        fecha: (valor) => { return parseFechaFlexible(valor) },
         importe: (valor) => { return stringANumero(valor) },
         numero: (valor) => { return Number(stringANumero(valor)) },
         numerador: (valor) => { return Number(stringANumero(valor)) },
-        date: (valor) => { return new Date(valor?.slice(0, 10).split('/')?.reverse()?.join('-')); },
+        date: (valor) => { return parseFechaFlexible(valor) },
 
     }
 
     $(`#t${numeroForm} span.filtro`).on("click", (e) => {
 
-        console.log(numeroForm);
         let filtro = $(e.currentTarget).parents(".th.tituloTablas").attr("filtro");
 
         $(`#t${numeroForm} .td.filtro, 
            #t${numeroForm} .tr.filtro`).removeClass(`oculto`);
-        console.log($(`#t${numeroForm} .td.filtro, 
-           #t${numeroForm} .tr.filtro`));
-        $(`#t${numeroForm} .td.filtro.${filtro} input`).trigger("focus")
+
+        $(`#t${numeroForm} .td.filtro.${filtro} input`).first().trigger("focus")
 
         $(`#t${numeroForm}`).animate({ scrollTop: 0 }, 'slow')
 
@@ -1453,6 +1533,9 @@ function filtrarAbm(objeto, numeroForm) {
         $(`#t${numeroForm} .td.filtro`).addClass(`oculto`);
 
         $(`#t${numeroForm} input.busqueda`).val("");
+        $(`#t${numeroForm} .busquedasColumna`).each((_, columna) => {
+            $(`.filtroCampo`, columna).slice(2).remove();
+        });
         $(`#bf${numeroForm} .cantidad`).html(consultaGet[numeroForm].length);
     });
     const normalizarTexto = (v) =>
@@ -1465,105 +1548,128 @@ function filtrarAbm(objeto, numeroForm) {
 
     const celdaTexto = (row, filtrado) =>
         normalizarTexto($(row).children(`div.${filtrado}`).text());
+    const celdaBruta = (row, filtrado) =>
+        ($(row).children(`div.${filtrado}`).text() ?? "").toString().trim();
 
-    const filtoTabla = (e) => {
+    const coincideConTermino = (termino, row, filtrado, type) => {
+        const terminoRaw = (termino ?? "").toString();
+        if (/^\s+$/.test(terminoRaw)) {
+            const filaRaw = celdaBruta(row, filtrado);
+            return filaRaw.trim() === "";
+        }
 
-        let valorBuscado = $(e.target).val().toLowerCase();
-        let type = $(e.currentTarget).parents(".td.filtro").attr("type");
-        let primerCaracter = valorBuscado.slice(0, 1);
-        let filtrado = $(e.target).parent().parent().attr(`filtro`);
-        let registros = $(`#t${numeroForm} .tr.fila`);
+        const valorBuscado = terminoRaw.toLowerCase();
+        const primerCaracter = valorBuscado.slice(0, 1);
+        const valorFila = tipoFiltro?.[type]?.(celdaBruta(row, filtrado)) ?? celdaTexto(row, filtrado);
+        const filaComp = normalizarComparable(valorFila);
 
         if (primerCaracter == ">") {
-
             if (valorBuscado.includes("<")) {
                 let indice = valorBuscado.indexOf("<");
                 let mayorQue = tipoFiltro?.[type]?.(valorBuscado.slice(1, indice).toLowerCase());
                 let menorQue = tipoFiltro?.[type]?.(valorBuscado.slice(indice + 1).toLowerCase());
-
-                $.each(registros, (indice, value) => {
-
-                    let valorFila = tipoFiltro?.[type]?.($(value).children(`div.${filtrado}`).text().trim()) || $(value).children(`div.${filtrado}`).text().toLowerCase().trim();
-
-                    if (valorFila > mayorQue && valorFila < menorQue) {
-                        $(value).removeClass(`oculto${filtrado}`);
-                    } else {
-                        $(value).addClass(`oculto${filtrado}`);
-                    }
-                });
-
-            } else {
-
-                let valorBuscadoMenor = tipoFiltro?.[type]?.(valorBuscado.slice(1).toLowerCase());
-                $.each(registros, (indice, value) => {
-                    let valorFila = tipoFiltro?.[type]?.($(value).children(`div.${filtrado}`).text().trim()) || $(value).children(`div.${filtrado}`).text().toLowerCase().trim();
-
-
-                    if (valorFila > valorBuscadoMenor) {
-                        $(value).removeClass(`oculto${filtrado}`);
-                    } else {
-                        $(value).addClass(`oculto${filtrado}`);
-                    }
-                });
-
+                const mayorComp = normalizarComparable(mayorQue);
+                const menorComp = normalizarComparable(menorQue);
+                return filaComp != null && mayorComp != null && menorComp != null && filaComp > mayorComp && filaComp < menorComp;
             }
-        } else if (primerCaracter == "<") {
 
+            let valorBuscadoMenor = tipoFiltro?.[type]?.(valorBuscado.slice(1).toLowerCase());
+            const buscadoComp = normalizarComparable(valorBuscadoMenor);
+            return filaComp != null && buscadoComp != null && filaComp > buscadoComp;
+        }
+
+        if (primerCaracter == "<") {
             if (valorBuscado.includes(">")) {
                 let indice = valorBuscado.indexOf(">");
                 let mayorQue = tipoFiltro?.[type]?.(valorBuscado.slice(1, indice).toLowerCase());
                 let menorQue = tipoFiltro?.[type]?.(valorBuscado.slice(indice + 1).toLowerCase());
-
-                $.each(registros, (indice, value) => {
-                    let valorFila = tipoFiltro?.[type]?.($(value).children(`div.${filtrado}`).html().trim()) || $(value).children(`div.${filtrado}`).html().toLowerCase().trim();
-
-                    if (valorFila < mayorQue && valorFila > menorQue) {
-                        $(value).removeClass(`oculto${filtrado}`);
-                    } else {
-                        $(value).addClass(`oculto${filtrado}`);
-                    }
-                });
-
-            } else {
-
-                let valorBuscadoMenor = tipoFiltro?.[type]?.(valorBuscado.slice(1).toLowerCase());
-
-                $.each(registros, (indice, value) => {
-                    let valorFila = tipoFiltro?.[type]?.($(value).children(`div.${filtrado}`).html().trim()) || $(value).children(`div.${filtrado}`).text().toLowerCase().trim();
-
-                    if (valorFila < valorBuscadoMenor) {
-                        $(value).removeClass(`oculto${filtrado}`);
-                    } else {
-                        $(value).addClass(`oculto${filtrado}`);
-                    }
-                });
+                const mayorComp = normalizarComparable(mayorQue);
+                const menorComp = normalizarComparable(menorQue);
+                return filaComp != null && mayorComp != null && menorComp != null && filaComp < mayorComp && filaComp > menorComp;
             }
-        } else {
-            const buscadoRaw = $(e.target).val();
-            const buscado = normalizarTexto(buscadoRaw);
 
-            $.each(registros, (indice, value) => {
-                const fila = celdaTexto(value, filtrado);
-
-                if (buscado === "vacio") {
-                    if (fila === "") $(value).removeClass(`oculto${filtrado}`);
-                    else $(value).addClass(`oculto${filtrado}`);
-                    return;
-                }
-
-                if (buscado === "!vacio") {
-                    if (fila !== "") $(value).removeClass(`oculto${filtrado}`);
-                    else $(value).addClass(`oculto${filtrado}`);
-                    return;
-                }
-
-                if (fila.includes(buscado)) $(value).removeClass(`oculto${filtrado}`);
-                else $(value).addClass(`oculto${filtrado}`);
-            });
+            let valorBuscadoMenor = tipoFiltro?.[type]?.(valorBuscado.slice(1).toLowerCase());
+            const buscadoComp = normalizarComparable(valorBuscadoMenor);
+            return filaComp != null && buscadoComp != null && filaComp < buscadoComp;
         }
+
+        const buscado = normalizarTexto(terminoRaw);
+        const fila = celdaTexto(row, filtrado);
+
+        if (buscado === "vacio") return fila === "";
+        if (buscado === "!vacio") return fila !== "";
+        return buscado !== "" && fila.includes(buscado);
+    };
+
+    const filtoTabla = (e) => {
+        let contenedorFiltro = $(e.currentTarget).closest(".td.filtro");
+        let type = contenedorFiltro.attr("type");
+        let filtrado = contenedorFiltro.attr(`filtro`);
+        let registros = $(`#t${numeroForm} .tr.fila`);
+        const terminos = $(`input.busqueda`, contenedorFiltro)
+            .map((_, input) => ($(input).val() ?? "").toString())
+            .get()
+            .filter((valor) => valor !== "");
+
+        if (terminos.length === 0) {
+            $.each(registros, (_, value) => {
+                $(value).removeClass(`oculto${filtrado}`);
+            });
+            $(`#bf${numeroForm} .cantidad`).html($(`#t${numeroForm} .tr.fila:visible`).length);
+            return;
+        }
+
+        $.each(registros, (_, value) => {
+            const coincide = terminos.some((termino) => coincideConTermino(termino, value, filtrado, type));
+            if (coincide) $(value).removeClass(`oculto${filtrado}`);
+            else $(value).addClass(`oculto${filtrado}`);
+        });
+
         $(`#bf${numeroForm} .cantidad`).html($(`#t${numeroForm} .tr.fila:visible`).length);
     };
-    $(`#t${numeroForm} .busqueda`).on("input", filtoTabla);
+    const autoAgregarCampoFiltro = (e) => {
+        const inputActual = $(e.currentTarget);
+        const columnaBusquedas = inputActual.closest(".busquedasColumna");
+        if (!columnaBusquedas.length) return;
+
+        const ultimoInput = columnaBusquedas.find(".filtroCampo:last input.busqueda");
+        const valorUltimo = (ultimoInput.val() ?? "").toString();
+        if (valorUltimo === "") return;
+
+        const primerInput = columnaBusquedas.find("input.busqueda").first();
+        const nuevoInput = primerInput.clone(false);
+        nuevoInput.val("");
+
+        const nuevoCampo = $(`<div class="filtroCampo"></div>`);
+        const botonEliminar = $(`<span class="material-symbols-outlined deleteFiltroCampo" title="Eliminar campo">delete</span>`);
+        nuevoCampo.append(nuevoInput).append(botonEliminar);
+        columnaBusquedas.append(nuevoCampo);
+    };
+
+    const tablaAbm = $(`#t${numeroForm}`);
+    tablaAbm.off("input.filtroDinamico", ".busqueda");
+    tablaAbm.on("input.filtroDinamico", ".busqueda", (e) => {
+        autoAgregarCampoFiltro(e);
+        filtoTabla(e);
+    });
+
+    tablaAbm.off("dblclick.filtroDinamico", ".td.filtro");
+
+    tablaAbm.off("click.filtroDinamico", ".deleteFiltroCampo");
+    tablaAbm.on("click.filtroDinamico", ".deleteFiltroCampo", (e) => {
+        e.stopPropagation();
+        const campo = $(e.currentTarget).closest(".filtroCampo");
+        const columnaBusquedas = campo.closest(".busquedasColumna");
+        const cantidadCampos = columnaBusquedas.children(".filtroCampo").length;
+
+        if (cantidadCampos <= 2) {
+            $("input.busqueda", campo).val("").trigger("input");
+            return;
+        }
+
+        campo.remove();
+        columnaBusquedas.find("input.busqueda").first().trigger("input");
+    });
 };
 function filtrarRegistrosCabeceraSelect(objeto, numeroForm, valorBuscado, filtrado) {
     // Primero, mostramos todos los registros
@@ -2160,7 +2266,7 @@ function tipoInput(objeto, numeroForm, names) {
                 $.each(value.componentes, function (ind, val) {
 
                     inputTabla += `<div class="td inputTd des ${ind}" id="inputTd${val.nombre}${numeroForm}" style="order:${indice}" cont=${numeroForm}  ${widthObject[val.width] || ""} ${ocultoOject[val.oculto] || ""}>
-                        <input class="inputR ${ind} ${numeroForm}" id="in${ind}${numeroForm}" readonly name="${ind}" form="f${objeto.accion}${numeroForm}" valid=${value.validacion}></div>`;
+                        <input class="inputR ${ind} ${numeroForm}" id="in${ind}${numeroForm}" readonly name="${ind}" form="f${objeto.accion}${numeroForm}" valid=${value.validacion} ${autoCompOff} ></div>`;
                     orderInput++
                 });
                 orderInput--
@@ -2186,19 +2292,19 @@ function tipoInput(objeto, numeroForm, names) {
     });
 
     inputTabla += `<div class="td inputTd auditoria des date" id="inputTddate${numeroForm}" style="order:9995" width=doce>
-              <input class="inputR date" id="indate${numeroForm}" soloLec=true name="date" type="datetime-local" form="f${objeto.accion}${numeroForm}"></div>`;
+              <input class="inputR date" id="indate${numeroForm}" soloLec=true name="date" type="datetime-local" form="f${objeto.accion}${numeroForm}" ${autoCompOff} ></div>`;
 
     inputTabla += `<div class="td inputTd auditoria des username" id="inputTdusername${numeroForm}" style="order:9996" width="doce">
-              <input class="inputR username" id="inusername${numeroForm}" soloLec=true name="username" form="f${objeto.accion}${numeroForm}" readonly></div>`;
+              <input class="inputR username" id="inusername${numeroForm}" soloLec=true name="username" form="f${objeto.accion}${numeroForm}" readonly ${autoCompOff} ></div>`;
 
     inputTabla += `<div class="td inputTd des version ocultoSiempre" id="inputTdversion${numeroForm}" style="order:9997">
-              <input class="inputR version" id="inversion${numeroForm}" name="version" value=0></div>`;
+              <input class="inputR version" id="inversion${numeroForm}" name="version" value=0 ${autoCompOff} ></div>`;
 
     inputTabla += `<div class="td inputTd des empresa ocultoSiempre" id="inputTdversion${numeroForm}" valueinicial="${$(`.navegacionSupHomeLog .tituloEmpresa .empresaSelect`)?.html()?.trim()}" style="order:9997">
-              <input class="inputR empresa" id="inversion${numeroForm}" name="empresa" value=0></div>`;
+              <input class="inputR empresa" id="inversion${numeroForm}" name="empresa" value=0 ${autoCompOff} ></div>`;
 
     inputTabla += `<div class="td inputTd  des _id ocultoSiempre" id="inputTd_id${numeroForm}" style="order:9998">
-              <input class="inputR _id" id="in_id${numeroForm}" name="_id" form="f${objeto.accion}${numeroForm}"></div>`;
+              <input class="inputR _id" id="in_id${numeroForm}" name="_id" form="f${objeto.accion}${numeroForm}" ${autoCompOff} ></div>`;
 
     inputTabla += "</div>"
 
@@ -2475,7 +2581,7 @@ async function cabeceraFiltroAbm(objeto, numeroForm) {
 
     $.each(objeto.atributos.cabeceraAbm?.input, (indice, value) => {
         atributosCabecera += `<div class="atributoCompletoCabecera"><h3>${value.titulo}:</h3>
-        <div><input class="${value?.atributo?.nombre || value?.atributo} cabecera" name="${value?.atributo?.nombre || value?.atributo}"></div></div>`;
+        <div><input class="${value?.atributo?.nombre || value?.atributo} cabecera" name="${value?.atributo?.nombre || value?.atributo}" ${autoCompOff} ></div></div>`;
     });
 
     $.each(objeto.atributos.cabeceraAbm?.div, (indice, value) => {
@@ -2706,9 +2812,9 @@ function adjuntoCeldaAbm(objeto, numeroForm) {
             $.each(registros?.path, (indice, value) => {
 
                 listaAdjunto += `<div class="tr fila" fila="${fila}">
-                        <div class="celdAdj nameUsu src=""><input class="nameUsu adjuntoForm" value="${registros.nameUsu[indice]}" form="f${objeto.accion}${numeroForm}"/></div>
-                        <div class="celdAdj originalname ocultoSiempre"><input class="originalname adjuntoForm" name="originalname" value="${registros.originalname[indice]}" form="f${objeto.accion}${numeroForm}"/></div> 
-                        <div class="celdAdj path ocultoSiempre"><input class="path adjuntoForm ocultoSiempre" name="path" value="${value}" form="f${objeto.accion}${numeroForm}"/></div>                                                                 
+                        <div class="celdAdj nameUsu src=""><input class="nameUsu adjuntoForm" value="${registros.nameUsu[indice]}" form="f${objeto.accion}${numeroForm}" ${autoCompOff} /></div>
+                        <div class="celdAdj originalname ocultoSiempre"><input class="originalname adjuntoForm" name="originalname" value="${registros.originalname[indice]}" form="f${objeto.accion}${numeroForm}" ${autoCompOff} /></div> 
+                        <div class="celdAdj path ocultoSiempre"><input class="path adjuntoForm ocultoSiempre" name="path" value="${value}" form="f${objeto.accion}${numeroForm}" ${autoCompOff} /></div>                                                                 
                         <div class="celdAdj verAdj "><img class="verAdj" img src="/img/iconos/botonAdjunto/VerAdj.svg" title="Ver adjunto"></div></div>`
                 fila++
             })
@@ -2800,10 +2906,10 @@ function adjuntoCeldaAbm(objeto, numeroForm) {
             listaAdjunto += `<div class="th fila titulos"><div class="nombre titulo" width="nueve">Nombre</div><div class="adjuntar ocultoSiempre titulo"></div><div class="verAdjunto titulo ocultoSiempre"></div><div class="titulo eliminarAdj"></div></div>`
             let fila = 0
             listaAdjunto += `<div class="tr fila filaVacia" fila="${fila}">
-                        <div class="celdAdj nameUsu vacio" src=""><input class="nameUsu adjuntoForm" name="nameUsu" form="f${objeto.accion}${numeroForm}" /></div>
-                        <div class="celdAdj path vacio ocultoSiempre" src=""><input class="path adjuntoForm" name="path" form="f${objeto.accion}${numeroForm}" /></div>
-                        <div class="celdAdj originalname vacio ocultoSiempre" src=""><input class="adjuntoForm originalname" name="originalname" form="f${objeto.accion}${numeroForm}" /></div>
-                        <div class="celdAdj adjunto vacio"><label for="adjunto${objeto.accion}${numeroForm}fila${fila}"></label><img src="/img/iconos/botonAdjunto/adjuntar.svg"/><input type=file id="adjunto${objeto.accion}${numeroForm}fila${fila}" name="adjunto" form="f${objeto.accion}${numeroForm}" class="adjunto adjuntoForm"/></div>
+                        <div class="celdAdj nameUsu vacio" src=""><input class="nameUsu adjuntoForm" name="nameUsu" form="f${objeto.accion}${numeroForm}"  ${autoCompOff} /></div>
+                        <div class="celdAdj path vacio ocultoSiempre" src=""><input class="path adjuntoForm" name="path" form="f${objeto.accion}${numeroForm}"  ${autoCompOff} /></div>
+                        <div class="celdAdj originalname vacio ocultoSiempre" src=""><input class="adjuntoForm originalname" name="originalname" form="f${objeto.accion}${numeroForm}"  ${autoCompOff} /></div>
+                        <div class="celdAdj adjunto vacio"><label for="adjunto${objeto.accion}${numeroForm}fila${fila}"></label><img src="/img/iconos/botonAdjunto/adjuntar.svg"/><input type=file id="adjunto${objeto.accion}${numeroForm}fila${fila}" name="adjunto" form="f${objeto.accion}${numeroForm}" class="adjunto adjuntoForm" ${autoCompOff} /></div>
                         <div class="celdAdj verAdj vacio"><img class="verAdj" img src="/img/iconos/botonAdjunto/VerAdj.svg" title="Ver adjunto"></div>
                         <div class="celdAdj eliminarAdj vacio"><img class="eliminarAdj" src="/img/iconos/botonAdjunto/deleteAdj.svg" title="Eliminar adjunto"></div>
                         <div class="celdAdj agregarFila vacio"><img class="agregarFila" src="/img/iconos/botonAdjunto/addAdj.svg" title="Agregar fila"></div></div>`
@@ -2984,10 +3090,10 @@ function adjuntoCeldaAbm(objeto, numeroForm) {
         const table = $(e.target).parents("div.contenido")
 
         let listaAdjunto = `<div class="tr fila filaVacia" fila="${fila}">
-                                <div class="celdAdj nameUsu vacio ${numeroForm}" src=""><input class="nameUsu ${numeroForm}" id="nameUsu${numeroForm}" name="nameUsu" form="f${objeto.accion}${numeroForm}" disabled="disabled"/></div>
-                                <div class="celdAdj path vacio ${numeroForm} ocultoSiempre" src=""><input class="path ${numeroForm}" id="path${numeroForm}" name="path" form="f${objeto.accion}${numeroForm}" disabled="disabled" /></div>                               
-                                <div class="celdAdj originalname vacio ${numeroForm} ocultoSiempre" src=""><input class="originalname ${numeroForm}" id="originalname${numeroForm}" name="originalname" form="f${objeto.accion}${numeroForm}" disabled="disabled" /></div>                               
-                                <div class="celdAdj adjunto vacio nuevo"><label for="adjunto${objeto.accion}${numeroForm}fila${fila}"><img src="/img/iconos/botonAdjunto/adjuntar.svg"/></label><input type=file id="adjunto${objeto.accion}${numeroForm}fila${fila}" name="adjunto" form="f${objeto.accion}${numeroForm}" class="adjunto"/></div>
+                                <div class="celdAdj nameUsu vacio ${numeroForm}" src=""><input class="nameUsu ${numeroForm}" id="nameUsu${numeroForm}" name="nameUsu" form="f${objeto.accion}${numeroForm}" disabled="disabled" ${autoCompOff} /></div>
+                                <div class="celdAdj path vacio ${numeroForm} ocultoSiempre" src=""><input class="path ${numeroForm}" id="path${numeroForm}" name="path" form="f${objeto.accion}${numeroForm}" disabled="disabled"  ${autoCompOff} /></div>                               
+                                <div class="celdAdj originalname vacio ${numeroForm} ocultoSiempre" src=""><input class="originalname ${numeroForm}" id="originalname${numeroForm}" name="originalname" form="f${objeto.accion}${numeroForm}" disabled="disabled"  ${autoCompOff} /></div>                               
+                                <div class="celdAdj adjunto vacio nuevo"><label for="adjunto${objeto.accion}${numeroForm}fila${fila}"><img src="/img/iconos/botonAdjunto/adjuntar.svg"/></label><input type=file id="adjunto${objeto.accion}${numeroForm}fila${fila}" name="adjunto" form="f${objeto.accion}${numeroForm}" class="adjunto" ${autoCompOff} /></div>
                                 <div class="celdAdj verAdj vacio nuevo"><img class="verAdj" img src="/img/iconos/botonAdjunto/VerAdj.svg" title="Ver adjunto"></div>
                                 <div class="celdAdj eliminarAdj vacio nuevo"><img class="eliminarAdj" src="/img/iconos/botonAdjunto/deleteAdj.svg" title="Eliminar adjunto"></div>
                                 <div class="celdAdj agregarFila vacio nuevo"><img class="agregarFila" src="/img/iconos/botonAdjunto/addAdj.svg" title="Agregar fila"></div></div>`;
@@ -3017,10 +3123,10 @@ function adjuntoCeldaAbm(objeto, numeroForm) {
             $.each(consulta?.path, (indice, value) => {
 
                 listaAdjunto += `<div class="tr fila" fila="${fila}">
-                        <div class="celdAdj nameUsu src=""><input class="nameUsu adjuntoForm" value="${consulta.nameUsu[indice]}" name="nameUsu" form="f${objeto.accion}${numeroForm}"/></div>
-                        <div class="celdAdj originalname ocultoSiempre"><input class="originalname adjuntoForm" name="originalname" value="${consulta.originalname[indice]}" form="f${objeto.accion}${numeroForm}"/></div> 
-                        <div class="celdAdj path ocultoSiempre"><input class="path adjuntoForm ocultoSiempre" name="path" value="${value}" form="f${objeto.accion}${numeroForm}"/></div>                                                                 
-                        <div class="celdAdj adjunto"><label for="adjunto${objeto.accion}${numeroForm}fila${fila}"><img src="/img/iconos/botonAdjunto/adjuntar.svg"/></label><input type=file id="adjunto${objeto.accion}${numeroForm}fila${fila}" name="adjunto" form="f${objeto.accion}${numeroForm}" class="adjunto adjuntoForm"/></div>
+                        <div class="celdAdj nameUsu src=""><input class="nameUsu adjuntoForm" value="${consulta.nameUsu[indice]}" name="nameUsu" form="f${objeto.accion}${numeroForm}" ${autoCompOff} /></div>
+                        <div class="celdAdj originalname ocultoSiempre"><input class="originalname adjuntoForm" name="originalname" value="${consulta.originalname[indice]}" form="f${objeto.accion}${numeroForm}" ${autoCompOff} /></div> 
+                        <div class="celdAdj path ocultoSiempre"><input class="path adjuntoForm ocultoSiempre" name="path" value="${value}" form="f${objeto.accion}${numeroForm}" ${autoCompOff} /></div>                                                                 
+                        <div class="celdAdj adjunto"><label for="adjunto${objeto.accion}${numeroForm}fila${fila}"><img src="/img/iconos/botonAdjunto/adjuntar.svg"/></label><input type=file id="adjunto${objeto.accion}${numeroForm}fila${fila}" name="adjunto" form="f${objeto.accion}${numeroForm}" class="adjunto adjuntoForm" ${autoCompOff} /></div>
                         <div class="celdAdj verAdj "><img class="verAdj" img src="/img/iconos/botonAdjunto/VerAdj.svg" title="Ver adjunto"></div>
                         <div class="celdAdj eliminarAdj"><img class="eliminarAdj"src="/img/iconos/botonAdjunto/deleteAdj.svg" title="Eliminar adjunto"></div></div>`
                 fila++
@@ -3028,10 +3134,10 @@ function adjuntoCeldaAbm(objeto, numeroForm) {
         }
 
         listaAdjunto += `<div class="tr fila filaVacia" fila="${fila}">
-                        <div class="celdAdj nameUsu vacio" src=""><input class="nameUsu adjuntoForm" name="nameUsu" form="f${objeto.accion}${numeroForm}" disabled="disabled" /></div>
-                        <div class="celdAdj path vacio ocultoSiempre" src=""><input class="path adjuntoForm" name="path" form="f${objeto.accion}${numeroForm}" disabled="disabled" /></div>
-                        <div class="celdAdj originalname vacio ocultoSiempre" src=""><input class="adjuntoForm originalname" name="originalname" form="f${objeto.accion}${numeroForm}" disabled="disabled"/></div>
-                        <div class="celdAdj adjunto vacio"><label for="adjunto${objeto.accion}${numeroForm}fila${fila}"><img src="/img/iconos/botonAdjunto/adjuntar.svg"/></label><input type=file id="adjunto${objeto.accion}${numeroForm}fila${fila}" name="adjunto" form="f${objeto.accion}${numeroForm}" class="adjunto adjuntoForm"/></div>
+                        <div class="celdAdj nameUsu vacio" src=""><input class="nameUsu adjuntoForm" name="nameUsu" form="f${objeto.accion}${numeroForm}" disabled="disabled"  ${autoCompOff} /></div>
+                        <div class="celdAdj path vacio ocultoSiempre" src=""><input class="path adjuntoForm" name="path" form="f${objeto.accion}${numeroForm}" disabled="disabled"  ${autoCompOff} /></div>
+                        <div class="celdAdj originalname vacio ocultoSiempre" src=""><input class="adjuntoForm originalname" name="originalname" form="f${objeto.accion}${numeroForm}" disabled="disabled" ${autoCompOff} /></div>
+                        <div class="celdAdj adjunto vacio"><label for="adjunto${objeto.accion}${numeroForm}fila${fila}"><img src="/img/iconos/botonAdjunto/adjuntar.svg"/></label><input type=file id="adjunto${objeto.accion}${numeroForm}fila${fila}" name="adjunto" form="f${objeto.accion}${numeroForm}" class="adjunto adjuntoForm" ${autoCompOff} /></div>
                         <div class="celdAdj verAdj vacio"><img class="verAdj" img src="/img/iconos/botonAdjunto/VerAdj.svg" title="Ver adjunto"></div>
                         <div class="celdAdj eliminarAdj vacio"><img class="eliminarAdj" src="/img/iconos/botonAdjunto/deleteAdj.svg" title="Eliminar adjunto"></div>
                         <div class="celdAdj agregarFila vacio"><img class="agregarFila" src="/img/iconos/botonAdjunto/addAdj.svg" title="Agregar fila"></div></div>`
@@ -3166,6 +3272,667 @@ function adjuntoCeldaAbm(objeto, numeroForm) {
 
             }
         }
+    })
+}
+const resizeTablaAbmState = {}
+const sortableColumnasAbm = {}
+const sortableFilasAbm = {}
+const resizeCookiePrefixAbm = "gf_resize_abm_v1"
+function hashResizeAbm(texto) {
+
+    let hash = 5381
+    const str = `${texto || ""}`
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) + hash) + str.charCodeAt(i)
+    }
+    return (hash >>> 0).toString(36)
+}
+function sanitizarColIdAbm(texto) {
+
+    const limpio = `${texto || "col"}`
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_-]/g, "")
+    return limpio || "col"
+}
+function normalizarOrdenDesdeCookieAbm(valor) {
+
+    if (Array.isArray(valor)) {
+        return valor.map((v) => `${v}`).filter((v) => v !== "")
+    }
+
+    if (valor && typeof valor === "object") {
+        return Object.entries(valor)
+            .sort((a, b) => (parseInt(a[1], 10) || 0) - (parseInt(b[1], 10) || 0))
+            .map(([colId]) => `${colId}`)
+            .filter((v) => v !== "")
+    }
+
+    if (typeof valor === "string") {
+        return valor
+            .split(",")
+            .map((v) => v.trim())
+            .filter((v) => v !== "")
+    }
+
+    return []
+}
+function esReferenciaOrdenNumericaAbm(ref) {
+
+    if (typeof ref === "number") return Number.isFinite(ref)
+    if (typeof ref !== "string") return false
+
+    const texto = ref.trim()
+    if (texto === "") return false
+    return /^-?\d+$/.test(texto)
+}
+function esHeaderReordenableAbm(th) {
+
+    if (!th?.length) return false
+    if (th.hasClass("logicoAprobacion")) return false
+    if (th.hasClass("oculto") || th.hasClass("ocultoSeguridad") || th.hasClass("ocultoSiempre")) return false
+    if (th.attr("oculto") === "true") return false
+    return th.is(":visible")
+}
+function obtenerHeadersReordenablesAbm(numeroForm) {
+
+    return $(`#t${numeroForm} .tr.tituloTablas .th.tituloTablas`).filter((_, el) => esHeaderReordenableAbm($(el)))
+}
+function obtenerDeviceResizeIdAbm() {
+
+    const key = "gesfin_device_resize_id"
+    try {
+        let id = localStorage.getItem(key)
+        if (!id) {
+            id = `dv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
+            localStorage.setItem(key, id)
+        }
+        return id
+    } catch (error) {
+        return `ua_${hashResizeAbm(navigator.userAgent || "sin_ua")}`
+    }
+}
+function nombreCookieResizeAbm(scopeKey) {
+
+    return `${resizeCookiePrefixAbm}_${hashResizeAbm(scopeKey)}`
+}
+function setCookieResizeAbm(nombre, valor, dias = 365) {
+
+    const ms = dias * 24 * 60 * 60 * 1000
+    const expires = new Date(Date.now() + ms).toUTCString()
+    document.cookie = `${nombre}=${encodeURIComponent(valor)}; expires=${expires}; path=/; SameSite=Lax`
+}
+function getCookieResizeAbm(nombre) {
+
+    const nombreEq = `${nombre}=`
+    const partes = document.cookie.split(";")
+
+    for (const parte of partes) {
+        const c = parte.trim()
+        if (c.indexOf(nombreEq) === 0) {
+            return decodeURIComponent(c.substring(nombreEq.length))
+        }
+    }
+    return ""
+}
+function getScopeResizeAbm(objeto) {
+
+    const usuario = usu || "anonimo"
+    const dispositivo = obtenerDeviceResizeIdAbm()
+    const empresa = empresaSeleccionada?._id || "sin_empresa"
+    const entidad = objeto?.nombre || objeto?.accion || "abm"
+    return `${usuario}|${dispositivo}|${empresa}|${entidad}`
+}
+function cargarResizeCookieAbm(scopeKey) {
+
+    try {
+        const nombre = nombreCookieResizeAbm(scopeKey)
+        const valor = getCookieResizeAbm(nombre)
+        if (!valor) return { columnas: {}, orden: [], filas: [] }
+
+        const parseado = JSON.parse(valor)
+        const ordenCookie = normalizarOrdenDesdeCookieAbm(
+            parseado?.orden ??
+            parseado?.order ??
+            parseado?.columnas?.orden
+        )
+        const filasCookie = normalizarOrdenDesdeCookieAbm(
+            parseado?.filas ??
+            parseado?.rows ??
+            parseado?.rowOrder
+        )
+
+        return {
+            columnas: (typeof parseado?.columnas === "object" && !Array.isArray(parseado?.columnas)) ? parseado.columnas : {},
+            orden: ordenCookie,
+            filas: filasCookie
+        }
+    } catch (error) {
+        return { columnas: {}, orden: [], filas: [] }
+    }
+}
+function guardarResizeCookieAbm(state) {
+
+    if (!state?.scopeKey) return
+    const nombre = nombreCookieResizeAbm(state.scopeKey)
+    const payload = JSON.stringify({
+        columnas: state.columnas || {},
+        orden: Array.isArray(state.orden) ? state.orden : [],
+        filas: Array.isArray(state.filas) ? state.filas : []
+    })
+    setCookieResizeAbm(nombre, payload, 365)
+}
+function getResizeStateAbm(numeroForm, objeto) {
+
+    if (!resizeTablaAbmState[numeroForm]) {
+        const scopeKey = getScopeResizeAbm(objeto)
+        const persistido = cargarResizeCookieAbm(scopeKey)
+        resizeTablaAbmState[numeroForm] = {
+            scopeKey,
+            columnas: persistido.columnas || {},
+            orden: persistido.orden || [],
+            filas: persistido.filas || []
+        }
+    }
+    return resizeTablaAbmState[numeroForm]
+}
+function obtenerOrdenColumnaAbm(elemento) {
+
+    const ordenCss = parseInt(elemento.css("order"), 10)
+    if (!Number.isNaN(ordenCss)) return ordenCss
+
+    const style = elemento.attr("style") || ""
+    const match = style.match(/order\s*:\s*(-?\d+)/i)
+    return match ? parseInt(match[1], 10) : null
+}
+function seleccionarColumnaPorOrdenAbm(numeroForm, orden) {
+
+    return $(
+        `#t${numeroForm} .th.tituloTablas,
+         #t${numeroForm} .td,
+         #t${numeroForm} .celda,
+         #t${numeroForm} .inputTd`
+    ).filter((_, el) => obtenerOrdenColumnaAbm($(el)) === orden)
+}
+function seleccionarColumnaPorRefAbm(numeroForm, referencia) {
+
+    if (!esReferenciaOrdenNumericaAbm(referencia)) {
+        const porId = $(`#t${numeroForm} [data-col-id="${referencia}"]`)
+        if (porId.length) return porId
+    }
+
+    const orden = parseInt(referencia, 10)
+    if (Number.isNaN(orden)) return $()
+    return seleccionarColumnaPorOrdenAbm(numeroForm, orden)
+}
+function aplicarAnchoColumnaAbm(numeroForm, referenciaColumna, anchoPx) {
+
+    const ancho = Math.max(80, Math.round(anchoPx))
+    const columna = seleccionarColumnaPorRefAbm(numeroForm, referenciaColumna)
+    if (!columna.length) return
+
+    columna.each((_, el) => {
+        el.style.setProperty("width", `${ancho}px`, "important")
+        el.style.setProperty("min-width", `${ancho}px`, "important")
+        el.style.setProperty("max-width", `${ancho}px`, "important")
+        el.style.setProperty("flex", `0 0 ${ancho}px`, "important")
+    })
+}
+function obtenerAnchoInicialColumnaAbm(th) {
+
+    if (!th?.length) return 120
+
+    const el = th.get(0)
+    const styles = window.getComputedStyle(el)
+    const maxWidth = parseFloat(styles.maxWidth)
+    if (!Number.isNaN(maxWidth) && Number.isFinite(maxWidth) && maxWidth > 0) return maxWidth
+
+    const width = parseFloat(styles.width)
+    if (!Number.isNaN(width) && Number.isFinite(width) && width > 0) return width
+
+    return th.outerWidth() || 120
+}
+function aplicarAlturaFilaAbm(fila, altoPx) {
+
+    const alto = Math.max(28, Math.round(altoPx))
+    fila.css({
+        height: `${alto}px`,
+        "min-height": `${alto}px`
+    })
+
+    fila.children(".celda, .td, .inputTd").css({
+        height: `${alto}px`,
+        "min-height": `${alto}px`
+    })
+}
+function asignarColIdsAbm(numeroForm) {
+
+    const headers = $(`#t${numeroForm} .tr.tituloTablas .th.tituloTablas`)
+    if (!headers.length) return
+
+    const usados = new Set()
+    headers.each((indice, header) => {
+        const th = $(header)
+        const orden = obtenerOrdenColumnaAbm(th)
+        if (orden == null) return
+
+        let colId = th.attr("data-col-id")
+        if (!colId) {
+            const refAtributo = th.attr("filtro") || th.attr("type") || `col_${indice}`
+            const baseId = sanitizarColIdAbm(refAtributo)
+            colId = `${baseId}_${orden}`
+
+            let intento = 1
+            while (usados.has(colId)) {
+                colId = `${baseId}_${orden}_${intento}`
+                intento++
+            }
+        }
+
+        usados.add(colId)
+        th.attr("data-col-id", colId)
+        seleccionarColumnaPorOrdenAbm(numeroForm, orden).attr("data-col-id", colId)
+    })
+}
+function normalizarOrdenColIdsAbm(ordenGuardado, colIdsActuales) {
+
+    const actualesSet = new Set(colIdsActuales)
+    const orden = []
+
+    if (Array.isArray(ordenGuardado)) {
+        for (const colId of ordenGuardado) {
+            if (!actualesSet.has(colId)) continue
+            if (orden.includes(colId)) continue
+            orden.push(colId)
+        }
+    }
+
+    for (const colId of colIdsActuales) {
+        if (!orden.includes(colId)) orden.push(colId)
+    }
+
+    return orden
+}
+function aplicarOrdenColumnasAbm(numeroForm, ordenGuardado) {
+
+    const headers = obtenerHeadersReordenablesAbm(numeroForm)
+    if (!headers.length) return []
+
+    const colIdsActuales = headers
+        .map((_, header) => $(header).attr("data-col-id"))
+        .get()
+        .filter((colId) => !!colId)
+    if (!colIdsActuales.length) return []
+
+    const ordenFinal = normalizarOrdenColIdsAbm(ordenGuardado, colIdsActuales)
+    const slotsOrden = headers
+        .map((_, header) => obtenerOrdenColumnaAbm($(header)))
+        .get()
+        .filter((valor) => Number.isFinite(valor))
+        .sort((a, b) => a - b)
+
+    ordenFinal.forEach((colId, indice) => {
+        const nuevoOrden = Number.isFinite(slotsOrden[indice]) ? slotsOrden[indice] : indice
+        $(`#t${numeroForm} [data-col-id="${colId}"]`).each((_, celda) => {
+            celda.style.setProperty("order", `${nuevoOrden}`)
+        })
+    })
+
+    return ordenFinal
+}
+function restaurarOrdenColumnasAbm(numeroForm, objeto) {
+
+    const state = getResizeStateAbm(numeroForm, objeto)
+    const ordenAplicado = aplicarOrdenColumnasAbm(numeroForm, state.orden)
+    state.orden = ordenAplicado
+}
+function normalizarRowIdAbm(valor, indice) {
+
+    const base = sanitizarColIdAbm(valor || `fila_${indice}`)
+    const hash = hashResizeAbm(valor || `fila_${indice}`).slice(0, 8)
+    return `row_${base}_${hash}`
+}
+function obtenerFilaIdAbm(fila, indice) {
+
+    const filaJq = $(fila)
+    const existente = filaJq.attr("data-row-id")
+    if (existente) return existente
+
+    const celdaId = filaJq.children(".celda._id").first()
+    const idInput = celdaId.find("input").val()
+    const idTexto = celdaId.text()?.trim()
+    const idRegistro = idInput || idTexto || filaJq.attr("idregistro") || filaJq.attr("fila")
+
+    return normalizarRowIdAbm(idRegistro, indice)
+}
+function obtenerFilasReordenablesAbm(numeroForm) {
+
+    return $(`#t${numeroForm} .table .tr.fila`).filter((_, fila) => $(fila).is(":visible"))
+}
+function asignarRowIdsAbm(numeroForm) {
+
+    const filas = $(`#t${numeroForm} .table .tr.fila`)
+    const usados = new Set()
+
+    filas.each((indice, fila) => {
+        let rowId = obtenerFilaIdAbm(fila, indice)
+        if (!rowId) return
+
+        let intento = 1
+        while (usados.has(rowId)) {
+            rowId = `${rowId}_${intento}`
+            intento++
+        }
+
+        usados.add(rowId)
+        $(fila).attr("data-row-id", rowId)
+    })
+}
+function normalizarOrdenFilasAbm(ordenGuardado, rowIdsActuales) {
+
+    const actualesSet = new Set(rowIdsActuales)
+    const orden = []
+
+    if (Array.isArray(ordenGuardado)) {
+        for (const rowId of ordenGuardado) {
+            if (!actualesSet.has(rowId)) continue
+            if (orden.includes(rowId)) continue
+            orden.push(rowId)
+        }
+    }
+
+    for (const rowId of rowIdsActuales) {
+        if (!orden.includes(rowId)) orden.push(rowId)
+    }
+
+    return orden
+}
+function aplicarOrdenFilasAbm(numeroForm, ordenGuardado) {
+
+    const tabla = $(`#t${numeroForm} .table`)
+    if (!tabla.length) return []
+
+    const filas = tabla.children(".tr.fila")
+    if (!filas.length) return []
+
+    const rowIdsActuales = filas
+        .map((_, fila) => $(fila).attr("data-row-id"))
+        .get()
+        .filter((rowId) => !!rowId)
+    if (!rowIdsActuales.length) return []
+
+    const ordenFinal = normalizarOrdenFilasAbm(ordenGuardado, rowIdsActuales)
+    const hayOrdenGuardado = Array.isArray(ordenGuardado) && ordenGuardado.length > 0
+    if (!hayOrdenGuardado) return ordenFinal
+
+    const mapaFilas = {}
+    filas.each((_, fila) => {
+        const rowId = $(fila).attr("data-row-id")
+        if (!rowId) return
+        ; (mapaFilas[rowId] ??= []).push(fila)
+    })
+
+    const ordenadas = []
+    const usadas = new Set()
+    ordenFinal.forEach((rowId) => {
+        const grupo = mapaFilas[rowId] || []
+        grupo.forEach((fila) => {
+            ordenadas.push(fila)
+            usadas.add(fila)
+        })
+    })
+
+    const restantes = filas.toArray().filter((fila) => !usadas.has(fila))
+    const filasFinales = [...ordenadas, ...restantes]
+    const primeraInput = tabla.children(".tr.input").first()
+
+    if (primeraInput.length) primeraInput.before(filasFinales)
+    else tabla.append(filasFinales)
+
+    return ordenFinal
+}
+function restaurarOrdenFilasAbm(numeroForm, objeto) {
+
+    const state = getResizeStateAbm(numeroForm, objeto)
+    const ordenAplicado = aplicarOrdenFilasAbm(numeroForm, state.filas)
+    state.filas = ordenAplicado
+}
+function insertarHandlesResizeAbm(numeroForm) {
+
+    const tabla = $(`#t${numeroForm}`)
+    if (!tabla.length) return
+
+    tabla.find(`.tr.tituloTablas .th.tituloTablas`).each((_, header) => {
+        const th = $(header)
+        const contenido = th.children(".th-contenido").first()
+
+        if (!th.children(".resize-col-handle").length) {
+            th.append(`<span class="resize-col-handle" title="Arrastrar para cambiar ancho"></span>`)
+        }
+        if (contenido.length && esHeaderReordenableAbm(th) && !contenido.children(".reorder-col-handle").length) {
+            contenido.prepend(`<span class="reorder-col-handle" title="Arrastrar para cambiar orden"></span>`)
+        }
+    })
+
+    tabla.find(`.tr.fila, .tr.input`).each((_, fila) => {
+        const tr = $(fila)
+        if (!tr.children(".resize-row-handle").length) {
+            tr.append(`<span class="resize-row-handle" title="Arrastrar para cambiar alto"></span>`)
+        }
+        if (tr.hasClass("fila") && !tr.children(".reorder-row-handle").length) {
+            tr.append(`<span class="reorder-row-handle" title="Arrastrar para cambiar orden de fila"></span>`)
+        }
+    })
+}
+function restaurarResizeColumnasAbm(numeroForm, objeto) {
+
+    const state = getResizeStateAbm(numeroForm, objeto)
+    const columnas = state?.columnas || {}
+    $.each(columnas, (referenciaColumna, ancho) => {
+        aplicarAnchoColumnaAbm(numeroForm, referenciaColumna, ancho)
+    })
+}
+function limpiarPreviewDropAbm(numeroForm) {
+
+    $(`#t${numeroForm} .drop-preview-before, #t${numeroForm} .drop-preview-after`).removeClass("drop-preview-before drop-preview-after")
+}
+function marcarPreviewDropAbm(numeroForm, evt, tipo) {
+
+    limpiarPreviewDropAbm(numeroForm)
+    const related = $(evt?.related)
+    if (!related.length) return
+
+    if (tipo === "columna" && !related.hasClass("th")) return
+    if (tipo === "fila" && !related.hasClass("fila")) return
+
+    related.addClass(evt?.willInsertAfter ? "drop-preview-after" : "drop-preview-before")
+}
+function inicializarReordenamientoColumnasAbm(numeroForm, objeto) {
+
+    const filaTitulos = document.querySelector(`#t${numeroForm} .tr.tituloTablas`)
+    if (!filaTitulos) return
+
+    if (sortableColumnasAbm[numeroForm]?.destroy) {
+        sortableColumnasAbm[numeroForm].destroy()
+    }
+
+    const headersReordenables = obtenerHeadersReordenablesAbm(numeroForm)
+    if (headersReordenables.length < 2) {
+        delete sortableColumnasAbm[numeroForm]
+        return
+    }
+
+    const state = getResizeStateAbm(numeroForm, objeto)
+    sortableColumnasAbm[numeroForm] = new Sortable(filaTitulos, {
+        animation: 120,
+        draggable: ".th.tituloTablas:not(.logicoAprobacion):not(.oculto):not(.ocultoSeguridad):not(.ocultoSiempre):not([oculto='true'])",
+        handle: ".reorder-col-handle",
+        filter: ".resize-col-handle",
+        preventOnFilter: false,
+        direction: "horizontal",
+        swapThreshold: 0.35,
+        invertSwap: true,
+        ghostClass: "sortable-ghost-item",
+        chosenClass: "sortable-chosen-item",
+        dragClass: "sortable-drag-item",
+        onStart: () => {
+            $(`#t${numeroForm}`).addClass("reordering-col")
+            limpiarPreviewDropAbm(numeroForm)
+        },
+        onMove: (evt) => {
+            marcarPreviewDropAbm(numeroForm, evt, "columna")
+            return true
+        },
+        onEnd: () => {
+            const nuevaSecuencia = $(filaTitulos)
+                .children(".th.tituloTablas")
+                .filter((_, header) => esHeaderReordenableAbm($(header)))
+                .map((_, header) => $(header).attr("data-col-id"))
+                .get()
+                .filter((colId) => !!colId)
+
+            state.orden = aplicarOrdenColumnasAbm(numeroForm, nuevaSecuencia)
+            guardarResizeCookieAbm(state)
+            limpiarPreviewDropAbm(numeroForm)
+            $(`#t${numeroForm}`).removeClass("reordering-col")
+        }
+    })
+}
+function inicializarReordenamientoFilasAbm(numeroForm, objeto) {
+
+    const contenedorFilas = document.querySelector(`#t${numeroForm} .table`)
+    if (!contenedorFilas) return
+
+    if (sortableFilasAbm[numeroForm]?.destroy) {
+        sortableFilasAbm[numeroForm].destroy()
+    }
+
+    const filasReordenables = obtenerFilasReordenablesAbm(numeroForm)
+    if (filasReordenables.length < 2) {
+        delete sortableFilasAbm[numeroForm]
+        return
+    }
+
+    const state = getResizeStateAbm(numeroForm, objeto)
+    sortableFilasAbm[numeroForm] = new Sortable(contenedorFilas, {
+        animation: 120,
+        draggable: ".tr.fila[data-row-id]",
+        handle: ".reorder-row-handle",
+        filter: ".resize-row-handle",
+        preventOnFilter: false,
+        direction: "vertical",
+        swapThreshold: 0.35,
+        invertSwap: true,
+        ghostClass: "sortable-ghost-item",
+        chosenClass: "sortable-chosen-item",
+        dragClass: "sortable-drag-item",
+        onStart: () => {
+            $(`#t${numeroForm}`).addClass("reordering-row")
+            limpiarPreviewDropAbm(numeroForm)
+        },
+        onMove: (evt) => {
+            marcarPreviewDropAbm(numeroForm, evt, "fila")
+            return true
+        },
+        onEnd: () => {
+            const ordenActual = $(contenedorFilas)
+                .children(".tr.fila[data-row-id]")
+                .map((_, fila) => $(fila).attr("data-row-id"))
+                .get()
+                .filter((rowId) => !!rowId)
+
+            state.filas = aplicarOrdenFilasAbm(numeroForm, ordenActual)
+            guardarResizeCookieAbm(state)
+            limpiarPreviewDropAbm(numeroForm)
+            $(`#t${numeroForm}`).removeClass("reordering-row")
+        }
+    })
+}
+function inicializarResizeTablaAbm(numeroForm, objeto) {
+
+    const tabla = $(`#t${numeroForm}`)
+    if (!tabla.length) return
+
+    insertarHandlesResizeAbm(numeroForm)
+    asignarColIdsAbm(numeroForm)
+    asignarRowIdsAbm(numeroForm)
+    restaurarOrdenColumnasAbm(numeroForm, objeto)
+    restaurarOrdenFilasAbm(numeroForm, objeto)
+    restaurarResizeColumnasAbm(numeroForm, objeto)
+    inicializarReordenamientoColumnasAbm(numeroForm, objeto)
+    inicializarReordenamientoFilasAbm(numeroForm, objeto)
+
+    tabla.off(".resizeAbm")
+    $(document).off(`.resizeAbm${numeroForm}`)
+
+    const state = getResizeStateAbm(numeroForm, objeto)
+    let drag = null
+
+    const terminarDrag = () => {
+        drag = null
+        tabla.removeClass("resizing-col resizing-row")
+        document.body.style.cursor = ""
+    }
+
+    tabla.on("mousedown.resizeAbm", ".resize-col-handle", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const th = $(e.currentTarget).closest(".th.tituloTablas")
+        const referenciaColumna = th.attr("data-col-id") || obtenerOrdenColumnaAbm(th)
+        if (referenciaColumna == null) return
+
+        drag = {
+            tipo: "columna",
+            numeroForm,
+            referenciaColumna,
+            start: e.pageX,
+            sizeInicial: obtenerAnchoInicialColumnaAbm(th)
+        }
+        tabla.addClass("resizing-col")
+        document.body.style.cursor = "col-resize"
+    })
+
+    tabla.on("mousedown.resizeAbm", ".resize-row-handle", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const fila = $(e.currentTarget).closest(".tr")
+        if (!fila.length) return
+
+        drag = {
+            tipo: "fila",
+            fila,
+            start: e.pageY,
+            sizeInicial: fila.outerHeight() || 32
+        }
+        tabla.addClass("resizing-row")
+        document.body.style.cursor = "row-resize"
+    })
+
+    $(document).on(`mousemove.resizeAbm${numeroForm}`, (e) => {
+        if (!drag) return
+        e.preventDefault()
+
+        if (drag.tipo === "columna") {
+            const nuevoAncho = drag.sizeInicial + (e.pageX - drag.start)
+            aplicarAnchoColumnaAbm(drag.numeroForm, drag.referenciaColumna, nuevoAncho)
+            state.columnas[drag.referenciaColumna] = Math.max(80, Math.round(nuevoAncho))
+            return
+        }
+
+        const nuevoAlto = drag.sizeInicial + (e.pageY - drag.start)
+        aplicarAlturaFilaAbm(drag.fila, nuevoAlto)
+    })
+
+    $(document).on(`mouseup.resizeAbm${numeroForm}`, () => {
+        if (!drag) return
+
+        if (drag.tipo === "columna") {
+            guardarResizeCookieAbm(state)
+        }
+        terminarDrag()
     })
 }
 function sorteableAbm(objeto, numeroForm) {
