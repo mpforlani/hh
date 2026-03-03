@@ -363,10 +363,11 @@ function agrupadoMes(objeto, numeroForm, nombreTab, objetoRep) {
             .tablaReporte table[rowspanCompat="true"] tr td:hover {
                 background-color: transparent !important;
                 font-weight: inherit !important;
-                cursor: default !important;
+                cursor: pointer !important;
             }
             .tablaReporte table[rowspanCompat="true"] tr td.seleccionada {
-                background-color: transparent !important;
+                background-color: #cfe3ff !important;
+                box-shadow: inset 0 0 0 1px #3f6fc8;
             }
             .tablaReporte table[rowspanCompat="true"] tr td.hoverGrupoCeldaCompat {
                 background-color: rgb(237, 239, 247) !important;
@@ -812,23 +813,31 @@ function tipoExtracto(objeto, numeroForm, nombreTab, objetoRep) {
 //////
 function abrirRegistroIndividual(objeto, numeroForm) {
 
-    $(`#t${numeroForm}`).on("dblclick", `div.infoRegistro tr`, (e) => {
+    $(`#t${numeroForm}`).on("dblclick", `div.infoRegistro tr[data-id]:not(.titulos)`, (e) => {
 
-        e.stopPropagation
+        e.stopPropagation();
 
-        let id = $(`td._id`, e.currentTarget).html()
-        let objetoDef = variablesModelo[objeto.entidad]
+        const id = ($(e.currentTarget).attr("data-id") || $(`td._id`, e.currentTarget).text() || "").trim();
+        if (!id) return;
+
+        const entidad = objeto?.tablaComplemento?.entidad || objeto.entidad;
+        let objetoDef = variablesModelo[entidad]
+        if (!entidad || !objetoDef) return;
         let detalleFiltroAtributos = { _id: id }
         const filtros = `&filtros=${JSON.stringify(detalleFiltroAtributos)}`
 
         $.ajax({
             type: "get",
             async: false,
-            url: `/get?base=${objeto.entidad}${filtros}`,
+            url: `/get?base=${entidad}${filtros}`,
             before: function () {
                 mouseEnEsperaForm(objeto, numeroForm)
             },
             success: function (data) {
+                if (!Array.isArray(data) || !data[0]) {
+                    quitarEsperaForm(objeto, numeroForm)
+                    return;
+                }
 
                 clickFormularioIndividualPestana(objetoDef, numeroForm, data[0])
 
@@ -846,7 +855,7 @@ async function tableDetalleEnumeracion(objeto, numeroForm, data) {
 
     let table = `<div class="contenedorTable">`
     table += `<table>`
-    table += `<tr>`
+    table += `<tr class="titulos">`
 
     for (const [index, val] of (objeto?.tablaComplemento?.pestanas ?? []).entries()) {
 
@@ -862,18 +871,25 @@ async function tableDetalleEnumeracion(objeto, numeroForm, data) {
 
     $.each(objeto.tablaComplemento.titulos, (ind, val) => {
 
-        table += `<th class="tablaComp ${objeto.tablaComplemento.atributos[ind].clase || ""} ${objeto.tablaComplemento.atributos[ind].nombre}">${val}</th>`
+        table += `<th class="tablaComp textoCentrado ${objeto.tablaComplemento.atributos[ind].clase || ""} ${objeto.tablaComplemento.atributos[ind].nombre}">${val}</th>`
     })
     table += `</tr>`//Cierro tr
 
 
     for (const value of data) {
 
-        table += `<tr>`
+        let idFila = value?._id ?? "";
+        if (typeof idFila === "object" && idFila !== null) {
+            idFila = idFila.$oid || idFila._id || "";
+        }
+        idFila = (idFila || "").toString().trim();
+        const idFilaAttr = idFila.replace(/"/g, "&quot;");
+
+        table += `<tr data-id="${idFilaAttr}">`
 
         for (const val of objeto.tablaComplemento.atributos) {
 
-            table += `<td class="tablaComp ${val.clase || ""} ${val.nombre}">${objetoTabla[val.type](val, value)}</td>`
+            table += `<td class="tablaComp textoCentrado ${val.clase || ""} ${val.nombre}">${objetoTabla[val.type](val, value)}</td>`
         }
 
 

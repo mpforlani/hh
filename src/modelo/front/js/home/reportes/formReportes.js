@@ -1298,16 +1298,126 @@ function administrarAtributoTabla(objeto, numeroForm, mo) {
     }
 
     inicializarFiltrosDinamicos();
-    const limpiarMarcaCeldaReporte = () => {
-        $(`#t${numeroForm} table td.seleccionada`).removeClass("seleccionada");
+    const $contenedorReporte = $(`#t${numeroForm}`);
+    const esCeldaSeleccionableReporte = (celda) => {
+        const $celda = $(celda);
+        if (!$celda.is("td")) return false;
+        const $fila = $celda.closest("tr");
+        return !$fila.is(".titulosFila, .filtros, .filaTotal");
+    };
+    const esObjetivoInteractivoReporte = (target) => {
+        return $(target).closest("input, textarea, select, button, a, [contenteditable=true]").length > 0;
+    };
+    const limpiarSeleccionCeldasReporte = ($tabla) => {
+        if ($tabla?.length) $tabla.find("td.seleccionada").removeClass("seleccionada");
+        else $contenedorReporte.find("table td.seleccionada").removeClass("seleccionada");
+
         const seleccion = window.getSelection?.();
         if (seleccion && seleccion.rangeCount > 0) {
             seleccion.removeAllRanges();
         }
     };
+    const obtenerPosicionCeldaReporte = ($celda, $tabla) => {
+        const $fila = $celda.closest("tr");
+        const filas = $tabla.find("tr").filter((_, fila) => {
+            const $filaActual = $(fila);
+            return !$filaActual.is(".titulosFila, .filtros, .filaTotal") && $filaActual.is(":visible");
+        });
+        return {
+            filaIdx: filas.index($fila),
+            colIdx: $fila.children("td:visible").index($celda)
+        };
+    };
+    const marcarRangoCeldasReporte = ($inicio, $fin) => {
+        if (!$inicio?.length || !$fin?.length) return;
 
-    $(`#t${numeroForm}`).off("mousemove.noHoverCeldaRep mousedown.noHoverCeldaRep click.noHoverCeldaRep", "table td");
-    $(`#t${numeroForm}`).on("mousemove.noHoverCeldaRep mousedown.noHoverCeldaRep click.noHoverCeldaRep", "table td", limpiarMarcaCeldaReporte);
+        const $tablaInicio = $inicio.closest("table");
+        const $tablaFin = $fin.closest("table");
+        if (!$tablaInicio.length || !$tablaFin.length || $tablaInicio.get(0) !== $tablaFin.get(0)) return;
+
+        const posInicio = obtenerPosicionCeldaReporte($inicio, $tablaInicio);
+        const posFin = obtenerPosicionCeldaReporte($fin, $tablaInicio);
+        if (posInicio.filaIdx < 0 || posFin.filaIdx < 0 || posInicio.colIdx < 0 || posFin.colIdx < 0) return;
+
+        limpiarSeleccionCeldasReporte($tablaInicio);
+
+        const filaMin = Math.min(posInicio.filaIdx, posFin.filaIdx);
+        const filaMax = Math.max(posInicio.filaIdx, posFin.filaIdx);
+        const colMin = Math.min(posInicio.colIdx, posFin.colIdx);
+        const colMax = Math.max(posInicio.colIdx, posFin.colIdx);
+
+        const filas = $tablaInicio.find("tr").filter((_, fila) => {
+            const $fila = $(fila);
+            return !$fila.is(".titulosFila, .filtros, .filaTotal") && $fila.is(":visible");
+        });
+
+        filas.each((filaIdx, fila) => {
+            if (filaIdx < filaMin || filaIdx > filaMax) return;
+            const celdas = $(fila).children("td:visible");
+            celdas.each((colIdx, celda) => {
+                if (colIdx >= colMin && colIdx <= colMax) {
+                    $(celda).addClass("seleccionada");
+                }
+            });
+        });
+    };
+
+    let arrastrandoCeldasReporte = false;
+    let celdaInicioReporte = null;
+    let ultimaCeldaReporte = null;
+    let seInicioEnCeldaSeleccionadaReporte = false;
+    let huboArrastreSeleccionReporte = false;
+
+    $contenedorReporte.off("mousedown.seleccionCeldaRep", "table td");
+    $contenedorReporte.on("mousedown.seleccionCeldaRep", "table td", function (e) {
+        if (e.button !== 0 || !esCeldaSeleccionableReporte(this) || esObjetivoInteractivoReporte(e.target)) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        const $celdaActual = $(this);
+        arrastrandoCeldasReporte = true;
+        celdaInicioReporte = $celdaActual;
+        ultimaCeldaReporte = $celdaActual;
+        huboArrastreSeleccionReporte = false;
+        seInicioEnCeldaSeleccionadaReporte = $celdaActual.hasClass("seleccionada");
+
+        if (!seInicioEnCeldaSeleccionadaReporte) {
+            marcarRangoCeldasReporte(celdaInicioReporte, celdaInicioReporte);
+        }
+    });
+
+    $contenedorReporte.off("mouseover.seleccionCeldaRep", "table td");
+    $contenedorReporte.on("mouseover.seleccionCeldaRep", "table td", function (e) {
+        if (!arrastrandoCeldasReporte || !esCeldaSeleccionableReporte(this) || !celdaInicioReporte?.length) return;
+        e.preventDefault();
+        const $celdaActual = $(this);
+        ultimaCeldaReporte = $celdaActual;
+        if (!$celdaActual.is(celdaInicioReporte)) {
+            huboArrastreSeleccionReporte = true;
+        }
+        marcarRangoCeldasReporte(celdaInicioReporte, $celdaActual);
+    });
+
+    $(document).off(`mouseup.seleccionCeldaRep${numeroForm}`);
+    $(document).on(`mouseup.seleccionCeldaRep${numeroForm}`, () => {
+        if (!arrastrandoCeldasReporte) return;
+
+        if (!huboArrastreSeleccionReporte && celdaInicioReporte?.length) {
+            if (seInicioEnCeldaSeleccionadaReporte) {
+                limpiarSeleccionCeldasReporte(celdaInicioReporte.closest("table"));
+            } else {
+                marcarRangoCeldasReporte(celdaInicioReporte, celdaInicioReporte);
+            }
+        } else if (huboArrastreSeleccionReporte && celdaInicioReporte?.length && ultimaCeldaReporte?.length) {
+            marcarRangoCeldasReporte(celdaInicioReporte, ultimaCeldaReporte);
+        }
+
+        arrastrandoCeldasReporte = false;
+        celdaInicioReporte = null;
+        ultimaCeldaReporte = null;
+        seInicioEnCeldaSeleccionadaReporte = false;
+        huboArrastreSeleccionReporte = false;
+    });
 
     $(`#t${numeroForm}`).on("click", `.flechasOrden span.arriba:not(.active)`, ordenarAscendente)
     $(`#t${numeroForm}`).on("click", `.flechasOrden span.abajo:not(.active)`, ordenarDescendente)
@@ -1339,8 +1449,13 @@ function administrarAtributoTabla(objeto, numeroForm, mo) {
 
     $(`#t${numeroForm} th.${objeto?.ordenDefault?.[0]?.nombre} .flechasOrden span.${objeto?.ordenDefault?.[1]}`).trigger("click")
     $(`#t${numeroForm}`).data("orden-ready", true);
+    const filaTitulos = $(`#t${numeroForm} tr.titulosFila`)
+    filaTitulos.css({ height: "", minHeight: "", maxHeight: "" })
+    filaTitulos.children("th,td").css({ height: "", minHeight: "", maxHeight: "", paddingTop: "", paddingBottom: "" })
+    const filasFiltro = $(`#t${numeroForm} tr.filtros`)
+    filasFiltro.removeClass("active")
     let alto = $(`#t${numeroForm} tr.titulosFila`).height()
-    $(`#t${numeroForm} tr.filtros`).css({ "top": `${alto}px` })
+    filasFiltro.css({ "top": `${alto}px` })
     inicializarResizeTablaReportes(numeroForm, objeto)
 
 
