@@ -1,7 +1,12 @@
 
 let variablesIniciales = {
 
+    locales: {
 
+        productosCompuestosHelados: variablesInicialesProduccion.productosCompuestosHelados,
+
+
+    }
 }
 
 let entidadesFiltrosEmail = Object.values(variablesIniciales?.locales || {}).filter(e => e?.enviar?.emailAtributo != undefined)
