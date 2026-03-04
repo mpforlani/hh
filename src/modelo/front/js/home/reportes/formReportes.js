@@ -597,7 +597,7 @@ function aplicarOrdenTablaReporte(tabla, ordenGuardado) {
         celdas.forEach((celda) => {
             const colId = celda.getAttribute("data-col-id")
             if (!colId) return
-            ; (porId[colId] ??= []).push(celda)
+                ; (porId[colId] ??= []).push(celda)
         })
 
         const usadas = new Set()
@@ -642,7 +642,7 @@ function aplicarOrdenFilasTablaReporte(tabla, ordenGuardado) {
     filasActuales.each((_, fila) => {
         const rowId = $(fila).attr("data-row-id")
         if (!rowId) return
-        ; (mapaFilas[rowId] ??= []).push(fila)
+            ; (mapaFilas[rowId] ??= []).push(fila)
     })
 
     const ordenadas = []
@@ -1132,22 +1132,56 @@ function administrarAtributoTabla(objeto, numeroForm, mo) {
         $(e.target).removeClass("active")
 
     }
+    const resetearFiltrosReporte = ($tabla) => {
+        if (!$tabla?.length) return;
+
+        $tabla.find(`tr[class*="oculto"]`).removeClass(function (index, className) {
+            return (className.match(/\boculto\S*/g) || []).join(' ');
+        });
+
+        $tabla.find(`tr.filtros td.filtro`)
+            .removeClass("filtroDeshabilitado")
+            .find("input.filtro")
+            .prop("disabled", false)
+            .val("");
+
+        $tabla.find(`tr.filtros td.filtro .closeFiltro`).removeClass("oculto");
+
+        $tabla.find(`.busquedasColumna`).each((_, columna) => {
+            $(`.filtroCampo`, columna).slice(2).remove();
+        });
+    };
     const filaFiltroOculto = (e) => {
+        const $tabla = $(e.target).closest("table");
 
-        if ($(e.target).hasClass("active")) {
-
-            $(`#t${numeroForm} tr[class*="oculto"]`).removeClass(function (index, className) {
-                return (className.match(/\boculto\S*/g) || []).join(' ');
-            });
-            $(`#t${numeroForm} td.filtro input`).val("")
-            $(`#t${numeroForm} .busquedasColumna`).each((_, columna) => {
-                $(`.filtroCampo`, columna).slice(2).remove();
-            });
-        }
+        if ($(e.target).hasClass("active")) resetearFiltrosReporte($tabla);
 
         $(e.target).parents('table').find('tr.filtros').toggleClass('active');
-
+        actualizarBarraRegistros($tabla);
     }
+    const actualizarBarraRegistros = ($tabla) => {
+        if (!$tabla?.length) return;
+
+        const registrosVisibles = $tabla.find("tr").filter((_, fila) => {
+            const $fila = $(fila);
+            return !$fila.is(".titulosFila, .segunFilaTitulos, .filtros, .filaTotal") && $fila.is(":visible");
+        }).length;
+
+        const barra = $tabla.nextAll(".barraCalculada").first();
+        if (!barra.length) return;
+
+        barra.find(".datosCalculados p").first().text(`Registros: ${registrosVisibles}`);
+    };
+    const cerrarFiltrosConCruz = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const $tabla = $(e.currentTarget).closest("table");
+        resetearFiltrosReporte($tabla);
+        $tabla.find("tr.filtros").removeClass("active");
+        $tabla.find("th .iconos .filtro span.filtro.active").removeClass("active");
+        actualizarBarraRegistros($tabla);
+    };
     const normalizarTexto = (v) => (v ?? "").toString().toLowerCase().trim();
     const parseFechaReporte = (valor) => {
         const texto = (valor ?? "").toString().trim();
@@ -1271,6 +1305,7 @@ function administrarAtributoTabla(objeto, numeroForm, mo) {
             $.each(registros, (_, fila) => {
                 $(fila).removeClass(`oculto${filtrado}`);
             });
+            actualizarBarraRegistros(tabla);
             return;
         }
 
@@ -1279,6 +1314,7 @@ function administrarAtributoTabla(objeto, numeroForm, mo) {
             if (coincide) $(fila).removeClass(`oculto${filtrado}`);
             else $(fila).addClass(`oculto${filtrado}`);
         });
+        actualizarBarraRegistros(tabla);
     }
     const autoAgregarCampoFiltro = (e) => {
         const inputActual = $(e.currentTarget);
@@ -1424,6 +1460,8 @@ function administrarAtributoTabla(objeto, numeroForm, mo) {
     $(`#t${numeroForm}`).on("click", `.flechasOrden span.active`, quitarActive)
     $(`#t${numeroForm}`).off("click.filtroRep", `th .iconos .filtro span.filtro`)
     $(`#t${numeroForm}`).on("click.filtroRep", `th .iconos .filtro span.filtro`, filaFiltroOculto)
+    $(`#t${numeroForm}`).off("click.filtroRep", `tr.filtros td.filtro .closeFiltro`)
+    $(`#t${numeroForm}`).on("click.filtroRep", `tr.filtros td.filtro .closeFiltro`, cerrarFiltrosConCruz)
     $(`#t${numeroForm}`).on("input", `tr.filtros input`, (e) => {
         autoAgregarCampoFiltro(e);
         filtros(e);
