@@ -277,6 +277,8 @@ async function crearFormulario(objeto, numeroForm, consult) {//doc
             }
         }
 
+        inicializarResizeCamposFormInd(objeto, numeroForm);
+
         setTimeout(function () {
             $(`#t${numeroForm} .inputSelect`).removeClass("actualizado");
         }, 2000);
@@ -856,6 +858,7 @@ async function crearFormulario(objeto, numeroForm, consult) {//doc
     validarFormulario(objeto, numeroForm);
     activePestana(objeto, numeroForm);
     renglones(objeto, numeroForm);
+    inicializarResizeCamposFormInd(objeto, numeroForm);
     eliminarDeshabilitar(objeto, numeroForm);
     totalesBaseYMoneda(objeto, numeroForm)
     funcionesFormato(objeto, numeroForm)
@@ -1657,7 +1660,10 @@ function editFormulario(objeto, numeroForm) {
 
     $(`#t${numeroForm} div.botonDescriptivo,
        #t${numeroForm} img,
-       #t${numeroForm} div.listadoAdjunto`).removeClass("disabled")
+       #t${numeroForm} div.listadoAdjunto,
+       #t${numeroForm} div.fo.imagen .imgCrear,
+       #t${numeroForm} div.fo.imagen .imgEliminar,
+       #t${numeroForm} div.fo.imagen label.botonImg`).removeClass("disabled")
 
     /*todos los imput y text tarea le remuevo readonly True*/
     $(`#t${numeroForm} input:not(.total).form,
@@ -3084,4 +3090,410 @@ function chequeGrupo(objeto, numeroForm) {
             $(`#t${numeroForm} table.gruposDeSeguridad tr.last td.vacio`).trigger("dblclick")
         }, 400)
     }
+}
+const FORM_IND_RESIZE_STORAGE_KEY = "gesfin_form_indiv_resize_v1";
+const FORM_IND_RESIZE_EDGE_PX = 8;
+const FORM_IND_RESIZE_MIN_PX = 128;
+
+function getResizeScopeFormInd(objeto) {
+
+    const usuario = usu || "anonimo";
+    const empresa = empresaSeleccionada?._id || "sin_empresa";
+    const entidad = objeto?.nombre || objeto?.accion || "sin_entidad";
+
+    return `${usuario}|${empresa}|${entidad}`;
+}
+function loadResizeStateFormInd(scope) {
+
+    try {
+        const raw = localStorage.getItem(FORM_IND_RESIZE_STORAGE_KEY);
+
+        if (!raw) {
+            return {};
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+            return {};
+        }
+
+        const scoped = parsed[scope];
+        if (!scoped || typeof scoped !== "object" || Array.isArray(scoped)) {
+            return {};
+        }
+
+        return scoped;
+    } catch (error) {
+        return {};
+    }
+}
+function saveResizeStateFormInd(scope, state) {
+
+    try {
+        const raw = localStorage.getItem(FORM_IND_RESIZE_STORAGE_KEY);
+        let parsed = {};
+
+        if (raw) {
+            const pre = JSON.parse(raw);
+
+            if (pre && typeof pre === "object" && !Array.isArray(pre)) {
+                parsed = pre;
+            }
+        }
+
+        parsed[scope] = state;
+
+        localStorage.setItem(FORM_IND_RESIZE_STORAGE_KEY, JSON.stringify(parsed));
+    } catch (error) {
+    }
+}
+function getResizableInputKey($input, $fo) {
+
+    if (!$input?.length || !$fo?.length) {
+        return "";
+    }
+
+    const name = ($input.attr("name") || "").trim() || "sin_name";
+    const clasesFo = (($fo.attr("class") || "").split(/\s+/)).filter(Boolean);
+    const clasePrincipal = clasesFo.find((clase) => {
+        return ![
+            "fo",
+            "fullRenglon",
+            "auditoria",
+            "oculto",
+            "ocultoSiempre",
+            "ocultoSeguridad",
+            "ocultoConLugar"
+        ].includes(clase);
+    }) || "fo";
+
+    return `${clasePrincipal}|${name}`;
+}
+function applyFoWidth($fo, widthPx) {
+
+    if (!$fo?.length) {
+        return;
+    }
+
+    const width = Math.max(FORM_IND_RESIZE_MIN_PX, Math.round(Number(widthPx) || 0));
+    const element = $fo.get(0);
+
+    if (!element) {
+        return;
+    }
+
+    element.style.setProperty("width", `${width}px`, "important");
+    element.style.setProperty("min-width", `${width}px`, "important");
+    element.style.setProperty("max-width", `${width}px`, "important");
+    element.style.setProperty("flex", "0 0 auto", "important");
+}
+function inicializarResizeCamposFormInd(objeto, numeroForm) {
+
+    const contenedor = $(`#t${numeroForm}`);
+    if (!contenedor.length) {
+        return;
+    }
+
+    const selectorInputsSimples = `div.fo > input.form[tabindex]:not([type=checkbox]):not([type=hidden]):not(.ocultoSiempre):not(.noResizeInput)`;
+    const selectorInputsParametricos = `div.fo .selectCont .inputSelect.form[tabindex]:not(.ocultoSiempre):not(.noResizeInput)`;
+    const selectorResize = `${selectorInputsSimples}, ${selectorInputsParametricos}`;
+    const handleClass = "input-resize-handle";
+    const selectorHandle = `.${handleClass}`;
+
+    const scope = getResizeScopeFormInd(objeto);
+    const state = loadResizeStateFormInd(scope);
+
+    contenedor.off(".resizeCamposFormInd");
+    $(document).off(`.resizeCamposFormInd${numeroForm}`);
+    contenedor.find(selectorHandle).remove();
+
+    const obtenerInputResizableFo = ($fo) => {
+        return $fo.find(selectorResize).filter(":visible").first();
+    };
+    const enBordeDerechoInput = (inputEl, clientX, clientY) => {
+        if (!inputEl) {
+            return false;
+        }
+
+        const rect = inputEl.getBoundingClientRect();
+        const distanciaBorde = rect.right - clientX;
+        const dentroY = clientY >= rect.top && clientY <= rect.bottom;
+
+        return dentroY && distanciaBorde >= -2 && distanciaBorde <= FORM_IND_RESIZE_EDGE_PX;
+    };
+    const posicionarHandleFo = ($fo) => {
+        const $input = obtenerInputResizableFo($fo);
+        if (!$input.length) {
+            $fo.children(selectorHandle).remove();
+            return;
+        }
+        const key = getResizableInputKey($input, $fo);
+
+        let $handle = $fo.children(selectorHandle);
+        if (!$handle.length) {
+            $handle = $(`<span class="${handleClass}" aria-hidden="true"></span>`);
+            $handle.appendTo($fo);
+        }
+
+        $handle.css({
+            top: "0px",
+            right: "0px",
+            left: "auto",
+            width: `${FORM_IND_RESIZE_EDGE_PX + 4}px`,
+            height: "100%",
+        });
+
+        if (key) {
+            $handle.attr("data-resize-key", key);
+        }
+    };
+
+    const restored = {};
+    contenedor.find(selectorResize).each((indice, input) => {
+
+        const $input = $(input);
+        const $fo = $input.closest("div.fo");
+        const key = getResizableInputKey($input, $fo);
+        const width = Number(state[key]);
+        const $renglon = $fo.closest("div.renglon");
+        const renglonWidth = $renglon.innerWidth() || $fo.parent().innerWidth() || $fo.outerWidth() || FORM_IND_RESIZE_MIN_PX;
+        const maxWidth = Math.max(FORM_IND_RESIZE_MIN_PX, Math.floor(Number(renglonWidth) - 8));
+
+        if (!key || restored[key] || !Number.isFinite(width) || width <= 0) {
+            return;
+        }
+
+        applyFoWidth($fo, Math.min(maxWidth, width));
+        restored[key] = true;
+    });
+
+    const procesados = new Set();
+    contenedor.find(selectorResize).each((indice, input) => {
+        const $fo = $(input).closest("div.fo");
+        const foEl = $fo.get(0);
+
+        if (!foEl || procesados.has(foEl)) {
+            return;
+        }
+
+        procesados.add(foEl);
+        posicionarHandleFo($fo);
+    });
+
+    let drag = null;
+
+    const finalizarDrag = () => {
+        drag = null;
+        contenedor.removeClass("input-resizing");
+        document.body.style.cursor = "";
+    };
+
+    contenedor.on("mousemove.resizeCamposFormInd", selectorResize, (e) => {
+
+        if (drag) {
+            return;
+        }
+
+        const $input = $(e.currentTarget);
+        const enBordeDerecho = enBordeDerechoInput(e.currentTarget, e.clientX, e.clientY);
+
+        if (enBordeDerecho) {
+            contenedor.find("input.input-resize-ready").not($input).removeClass("input-resize-ready");
+            $input.addClass("input-resize-ready");
+        } else {
+            $input.removeClass("input-resize-ready");
+        }
+    });
+
+    contenedor.on("mouseleave.resizeCamposFormInd", selectorResize, (e) => {
+        if (drag) {
+            return;
+        }
+
+        $(e.currentTarget).removeClass("input-resize-ready");
+    });
+    contenedor.on("mousemove.resizeCamposFormInd", "div.fo", (e) => {
+
+        if (drag) {
+            return;
+        }
+
+        const $fo = $(e.currentTarget);
+        const $input = obtenerInputResizableFo($fo);
+
+        if (!$input.length) {
+            return;
+        }
+
+        if (enBordeDerechoInput($input.get(0), e.clientX, e.clientY)) {
+            contenedor.find("input.input-resize-ready").not($input).removeClass("input-resize-ready");
+            $input.addClass("input-resize-ready");
+        } else {
+            $input.removeClass("input-resize-ready");
+        }
+    });
+    contenedor.on("mouseleave.resizeCamposFormInd", "div.fo", (e) => {
+        if (drag) {
+            return;
+        }
+
+        const $input = obtenerInputResizableFo($(e.currentTarget));
+        $input.removeClass("input-resize-ready");
+    });
+
+    contenedor.on("mousedown.resizeCamposFormInd", selectorResize, (e) => {
+
+        if (e.which !== 1) {
+            return;
+        }
+
+        const input = e.currentTarget;
+        const rect = input.getBoundingClientRect();
+        const distanciaBorde = rect.right - e.clientX;
+
+        if (distanciaBorde < 0 || distanciaBorde > FORM_IND_RESIZE_EDGE_PX) {
+            return;
+        }
+
+        const $input = $(input);
+        const $fo = $input.closest("div.fo");
+
+        if (!$fo.length) {
+            return;
+        }
+
+        const $renglon = $fo.closest("div.renglon");
+        const renglonWidth = $renglon.innerWidth() || $fo.parent().innerWidth() || $fo.outerWidth() || FORM_IND_RESIZE_MIN_PX;
+        const maxWidth = Math.max(FORM_IND_RESIZE_MIN_PX, Math.floor(Number(renglonWidth) - 8));
+        const key = getResizableInputKey($input, $fo);
+
+        drag = {
+            key,
+            $input,
+            $fo,
+            startX: e.pageX,
+            startWidth: Math.round($fo.outerWidth() || FORM_IND_RESIZE_MIN_PX),
+            minWidth: FORM_IND_RESIZE_MIN_PX,
+            maxWidth,
+        };
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        contenedor.addClass("input-resizing");
+        $input.addClass("input-resize-ready");
+        document.body.style.cursor = "ew-resize";
+    });
+    contenedor.on("mousedown.resizeCamposFormInd", "div.fo", (e) => {
+
+        if (e.which !== 1) {
+            return;
+        }
+        if ($(e.target).closest(selectorHandle).length) {
+            return;
+        }
+        if ($(e.target).is(selectorResize)) {
+            return;
+        }
+
+        const $fo = $(e.currentTarget);
+        const $input = obtenerInputResizableFo($fo);
+
+        if (!$input.length) {
+            return;
+        }
+        if (!enBordeDerechoInput($input.get(0), e.clientX, e.clientY)) {
+            return;
+        }
+
+        const $renglon = $fo.closest("div.renglon");
+        const renglonWidth = $renglon.innerWidth() || $fo.parent().innerWidth() || $fo.outerWidth() || FORM_IND_RESIZE_MIN_PX;
+        const maxWidth = Math.max(FORM_IND_RESIZE_MIN_PX, Math.floor(Number(renglonWidth) - 8));
+        const key = getResizableInputKey($input, $fo);
+
+        drag = {
+            key,
+            $input,
+            $fo,
+            startX: e.pageX,
+            startWidth: Math.round($fo.outerWidth() || FORM_IND_RESIZE_MIN_PX),
+            minWidth: FORM_IND_RESIZE_MIN_PX,
+            maxWidth,
+        };
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        contenedor.addClass("input-resizing");
+        $input.addClass("input-resize-ready");
+        document.body.style.cursor = "ew-resize";
+    });
+    contenedor.on("mousedown.resizeCamposFormInd", selectorHandle, (e) => {
+
+        if (e.which !== 1) {
+            return;
+        }
+
+        const $handle = $(e.currentTarget);
+        const $fo = $handle.closest("div.fo");
+        const $input = obtenerInputResizableFo($fo);
+
+        if (!$fo.length || !$input.length) {
+            return;
+        }
+
+        const $renglon = $fo.closest("div.renglon");
+        const renglonWidth = $renglon.innerWidth() || $fo.parent().innerWidth() || $fo.outerWidth() || FORM_IND_RESIZE_MIN_PX;
+        const maxWidth = Math.max(FORM_IND_RESIZE_MIN_PX, Math.floor(Number(renglonWidth) - 8));
+        const key = $handle.attr("data-resize-key") || getResizableInputKey($input, $fo);
+
+        drag = {
+            key,
+            $input,
+            $fo,
+            startX: e.pageX,
+            startWidth: Math.round($fo.outerWidth() || FORM_IND_RESIZE_MIN_PX),
+            minWidth: FORM_IND_RESIZE_MIN_PX,
+            maxWidth,
+        };
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        contenedor.addClass("input-resizing");
+        $input.addClass("input-resize-ready");
+        document.body.style.cursor = "ew-resize";
+    });
+
+    $(document).on(`mousemove.resizeCamposFormInd${numeroForm}`, (e) => {
+
+        if (!drag) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const nuevoAncho = Math.round(drag.startWidth + (e.pageX - drag.startX));
+        const anchoFinal = Math.min(drag.maxWidth, Math.max(drag.minWidth, nuevoAncho));
+
+        applyFoWidth(drag.$fo, anchoFinal);
+        posicionarHandleFo(drag.$fo);
+    });
+
+    $(document).on(`mouseup.resizeCamposFormInd${numeroForm}`, () => {
+
+        if (!drag) {
+            return;
+        }
+
+        const widthFinal = Math.round(drag.$fo.outerWidth() || FORM_IND_RESIZE_MIN_PX);
+
+        if (drag.key) {
+            state[drag.key] = widthFinal;
+            saveResizeStateFormInd(scope, state);
+        }
+
+        drag.$input.removeClass("input-resize-ready");
+        finalizarDrag();
+    });
 }

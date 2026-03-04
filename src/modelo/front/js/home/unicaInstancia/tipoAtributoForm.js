@@ -774,12 +774,12 @@ function imagenForm(objeto, numeroForm, indice, value, titulos, consulta, disabl
     form += `<div class="contenedorImg">`
     form += `<div class="vistaPrevia">${img || "Vacio"}</div>`
     form += `<div class="botones">
-             <div class="imgCrear">`
-    form += `<label for="imgAdj${numeroForm}" class="botonImg">
-             <img src="/img/iconos/botonAdjunto/adjuntar.svg"></label>
-             <input class="ocultoSiempre"type="file" id="imgAdj${numeroForm}" name="imgAdj" form="f${accion}${numeroForm}" accept="image/*" ${autoCompOff} >`
+             <div class="imgCrear ${disabled}">`
+    form += `<label for="imgAdj${numeroForm}" class="botonImg ${disabled}">
+             <img class="${disabled}" src="/img/iconos/botonAdjunto/adjuntar.svg"></label>
+             <input class="ocultoSiempre"type="file" id="imgAdj${numeroForm}" name="imgAdj" form="f${accion}${numeroForm}" accept="image/*" ${disabled} ${autoCompOff} >`
     form += `</div>`
-    form += `<div class="imgEliminar"><img src="/img/iconos/botonAdjunto/deleteAdj.svg""></div>`
+    form += `<div class="imgEliminar ${disabled}"><img class="${disabled}" src="/img/iconos/botonAdjunto/deleteAdj.svg""></div>`
     form += `</div>`
     form += `</div>`
     form += `<input class="pathImg ocultoSiempre" name="pathImg" value="${consulta.pathImg || ""}" form="f${accion}${numeroForm}" ${disabled} ${autoCompOff} />
@@ -791,9 +791,10 @@ function imagenForm(objeto, numeroForm, indice, value, titulos, consulta, disabl
 
         const nombreDescriptivo = () => {
 
-            if ($(`#t${numeroForm} input._id`).attr(`disabled`)) {
-                editFormulario(objeto, numeroForm);
-                botonesEditarFormInd(numeroForm)
+            const enConsulta = $(`#t${numeroForm} input._id`).attr(`disabled`) && $(`#t${numeroForm} input._id`).val() != "";
+            if (enConsulta) {
+                e.target.value = "";
+                return;
             }
 
             let valorAdjunto = $(e.target).val();
@@ -837,6 +838,11 @@ function imagenForm(objeto, numeroForm, indice, value, titulos, consulta, disabl
         editarAdjNa[permisos]()
     })
     $(`#t${numeroForm}`).on("click", ".imgEliminar", (e) => {
+
+        const enConsulta = $(`#t${numeroForm} input._id`).attr(`disabled`) && $(`#t${numeroForm} input._id`).val() != "";
+        if (enConsulta) {
+            return;
+        }
 
         $(`#t${numeroForm} div.fo.imagen input`).val("")
         $(`#t${numeroForm} div.fo.imagen .vistaPrevia img`).remove()

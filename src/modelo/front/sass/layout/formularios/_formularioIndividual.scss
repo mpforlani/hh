@@ -207,6 +207,22 @@
     border-top: transparent;
 }
 
+.input-resize-ready {
+    cursor: ew-resize !important;
+}
+
+.input-resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    z-index: 30;
+    cursor: ew-resize;
+    user-select: none;
+    touch-action: none;
+    background: transparent;
+}
+
 .formularioPestana.active,
 .formulario {
     width: 100%;
@@ -231,6 +247,10 @@
 
     &.enEspera {
         cursor: wait !important;
+    }
+
+    &.input-resizing {
+        user-select: none;
     }
 
     &.desHabilitado {
@@ -956,6 +976,13 @@
 
                 .botones {
                     display: block;
+
+                    .imgCrear.disabled,
+                    .imgEliminar.disabled,
+                    .botonImg.disabled {
+                        pointer-events: none;
+                        opacity: 0.6;
+                    }
 
                     img {
                         width: 1.5rem;
